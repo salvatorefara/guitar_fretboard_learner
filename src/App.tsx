@@ -1,10 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import createTuner from '@pedroloch/tuner'
+import useMicrophoneVolume from "react-use-microphone-volume-hook"
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
+const tuner = createTuner()
+
+tuner.start()
+
 function App() {
   const [count, setCount] = useState(0)
+  const [isListening, setIsListening] = useState(false)
+  const [volume, { startTrackingMicrophoneVolume, stopTrackingMicrophoneVolume }] = useMicrophoneVolume({ autoStart: true })
+
+  tuner.getData((data) => {
+    console.log(data) // => {frequency: 220.47996157982865, pitch: 220, note: "A", diff: 7}
+  })
+
 
   return (
     <>
@@ -26,7 +39,7 @@ function App() {
         </p>
       </div>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
+        Click on the Vite and React logos to learn more (Volume {volume})
       </p>
     </>
   )
