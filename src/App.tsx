@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import createTuner from "@pedroloch/tuner";
 import { TunerData } from "@pedroloch/tuner/dist/interfaces";
 import useMicrophoneVolume from "react-use-microphone-volume-hook";
+import { C0, Notes } from "./constants";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
@@ -16,6 +17,10 @@ const defaultTunerData: TunerData = {
 const volumeThreshold = 30;
 
 const tuner = createTuner();
+
+function getOctave(pitch: number) {
+  return Math.floor(Math.log2(pitch / C0));
+}
 
 function App() {
   const [isListening, setIsListening] = useState(false);
@@ -55,6 +60,8 @@ function App() {
     }
   });
 
+  const random_note = Notes[Math.floor(Math.random() * Notes.length)];
+
   return (
     <>
       <div>
@@ -75,7 +82,9 @@ function App() {
         </p>
       </div>
       <p className="read-the-docs">
-        Volume {volume}, Tuner {tunerData.note}
+        Volume {volume}, Tuner {tunerData.note} {tunerData.pitch}, Octave
+        {getOctave(tunerData.pitch)}, Random Note
+        {random_note.name} {random_note.octave}
       </p>
     </>
   );
