@@ -1,23 +1,59 @@
-import { useState, useEffect } from 'react'
-import createTuner from '@pedroloch/tuner'
-import useMicrophoneVolume from "react-use-microphone-volume-hook"
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import createTuner from "@pedroloch/tuner";
+import { TunerData } from "@pedroloch/tuner/dist/interfaces";
+import useMicrophoneVolume from "react-use-microphone-volume-hook";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import "./App.css";
 
-const tuner = createTuner()
+const defaultTunerData: TunerData = {
+  frequency: 0,
+  pitch: 440,
+  note: "A",
+  diff: 0,
+};
 
-tuner.start()
+const volumeThreshold = 30;
+
+const tuner = createTuner();
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [isListening, setIsListening] = useState(false)
-  const [volume, { startTrackingMicrophoneVolume, stopTrackingMicrophoneVolume }] = useMicrophoneVolume({ autoStart: true })
+  const [isListening, setIsListening] = useState(false);
+  const [tunerData, setTunerData] = useState<TunerData>(defaultTunerData);
+  const [
+    volume,
+    { startTrackingMicrophoneVolume, stopTrackingMicrophoneVolume },
+  ] = useMicrophoneVolume();
+
+  const handleListening = () => {
+    if (isListening) {
+      disableListening();
+    } else {
+      enableListening();
+    }
+  };
+
+  const enableListening = () => {
+    const status = startTrackingMicrophoneVolume();
+    if (status) setIsListening(true);
+    tuner.start();
+  };
+
+  const disableListening = () => {
+    const status = stopTrackingMicrophoneVolume();
+    if (status) setIsListening(false);
+    tuner.stop();
+  };
+
+  useEffect(() => {
+    console.log("Listening Changed", isListening);
+  }, [isListening]);
 
   tuner.getData((data) => {
-    console.log(data) // => {frequency: 220.47996157982865, pitch: 220, note: "A", diff: 7}
-  })
-
+    if (volume >= volumeThreshold) {
+      setTunerData(data);
+    }
+  });
 
   return (
     <>
@@ -31,18 +67,18 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={handleListening}>
+          {isListening ? "Stop practice" : "Start practice"}
         </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
       </div>
       <p className="read-the-docs">
-        Click on the Vite and React logos to learn more (Volume {volume})
+        Volume {volume}, Tuner {tunerData.note}
       </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
