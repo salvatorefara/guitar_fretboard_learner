@@ -17,10 +17,14 @@ const defaultTunerData: TunerData = {
 
 const volumeThreshold = 30;
 
-const pitchTracker = createTuner();
+// const pitchTracker = createTuner();
 
 function getOctave(pitch: number) {
   return Math.floor(Math.log2(pitch / C0));
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function App() {
@@ -41,24 +45,24 @@ function App() {
     }
   };
 
-  const handleListening = () => {
-    if (isListening) {
-      disableListening();
-    } else {
-      enableListening();
-    }
-  };
-
   const enableListening = () => {
-    const status = startTrackingMicrophoneVolume();
-    if (status) setIsListening(true);
-    pitchTracker.start();
+    if (!isListening) {
+      const status = startTrackingMicrophoneVolume();
+      if (status) setIsListening(true);
+    }
+    // if (!pitchTracker.isOn) {
+    //   pitchTracker.start();
+    // }
   };
 
   const disableListening = () => {
-    const status = stopTrackingMicrophoneVolume();
-    if (status) setIsListening(false);
-    pitchTracker.stop();
+    if (isListening) {
+      const status = stopTrackingMicrophoneVolume();
+      if (status) setIsListening(false);
+    }
+    // if (pitchTracker.isOn) {
+    //   pitchTracker.stop();
+    // }
   };
 
   useEffect(() => {
@@ -66,27 +70,48 @@ function App() {
 
     switch (practiceState) {
       case "Idle":
+        disableListening();
         break;
       case "New Note":
         const randomNote = Notes[Math.floor(Math.random() * Notes.length)];
         setCurrentNote(randomNote);
         setPracticeState("Listening");
-        enableListening();
         break;
       case "Listening":
+        enableListening();
+        break;
+      case "Feedback":
+        disableListening();
+        console.log(currentNote.name, tunerData.note);
+        console.log(currentNote.octave, getOctave(tunerData.pitch));
+        setPracticeState("Pause");
+        // if (
+        //   currentNote.name == tunerData.note &&
+        //   currentNote.octave == getOctave(tunerData.pitch)
+        // ) {
+        //   console.log("Correct");
+        // } else {
+        //   console.log("Incorrect");
+        // }
+        break;
+      case "Pause":
+        setTimeout(() => {
+          setPracticeState("New Note");
+        }, 100);
         break;
     }
   }, [practiceState]);
 
   useEffect(() => {
-    console.log("Listening Changed", isListening);
+    console.log("Listening: ", isListening);
   }, [isListening]);
 
-  pitchTracker.getData((data) => {
-    if (volume >= volumeThreshold) {
-      setTunerData(data);
-    }
-  });
+  // pitchTracker.getData((data) => {
+  //   // if (volume >= volumeThreshold) {
+  //   setTunerData(data);
+  //   setPracticeState("Feedback");
+  //   // }
+  // });
 
   return (
     <>
@@ -108,9 +133,9 @@ function App() {
         </p>
       </div>
       <p className="read-the-docs">
-        Volume {volume}, Tuner {tunerData.note} {tunerData.pitch}, Octave
-        {getOctave(tunerData.pitch)}, Random Note
-        {currentNote.name} {currentNote.octave}
+        Volume {volume},
+        {/* Tuner {tunerData.note} {tunerData.pitch}, Octave {getOctave(tunerData.pitch)},  */}
+        Random Note {currentNote.name} {currentNote.octave}
       </p>
     </>
   );
