@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { YIN } from "pitchfinder";
 import createTuner from "@pedroloch/tuner";
 import { TunerData } from "@pedroloch/tuner/dist/interfaces";
 import useMicrophoneVolume from "react-use-microphone-volume-hook";
@@ -141,4 +142,85 @@ function App() {
   );
 }
 
-export default App;
+const PitchDetection: React.FC = () => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [pitch, setPitch] = useState<number | null>(null);
+
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+
+  const detectPitch = YIN();
+
+  useEffect(() => {
+    return () => {
+      stopRecording();
+    };
+  }, []);
+
+  const startRecording = async () => {
+    try {
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const audioContext = new window.AudioContext();
+      const source = audioContext.createMediaStreamSource(stream);
+
+      const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+      scriptProcessor.onaudioprocess = (event) => {
+        const inputBuffer = event.inputBuffer.getChannelData(0);
+
+        // Run pitch detection on the current audio frame
+        const detectedPitch = detectPitch(inputBuffer);
+        setPitch(detectedPitch || null);
+      };
+
+      source.connect(scriptProcessor);
+      scriptProcessor.connect(audioContext.destination);
+
+      mediaStreamRef.current = stream;
+      audioContextRef.current = audioContext;
+      sourceRef.current = source;
+      scriptProcessorRef.current = scriptProcessor;
+
+      setIsRecording(true);
+    } catch (err) {
+      console.error("Error accessing microphone:", err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+    }
+    if (sourceRef.current) {
+      sourceRef.current.disconnect();
+    }
+    if (scriptProcessorRef.current) {
+      scriptProcessorRef.current.disconnect();
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+    }
+
+    setIsRecording(false);
+  };
+
+  return (
+    <div>
+      <h1>Real-Time Pitch Detection</h1>
+      <button onClick={isRecording ? stopRecording : startRecording}>
+        {isRecording ? "Stop Recording" : "Start Recording"}
+      </button>
+      {pitch && (
+        <div>
+          <h2>Detected Pitch: {pitch.toFixed(2)} Hz</h2>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PitchDetection;
+
+// export default App;

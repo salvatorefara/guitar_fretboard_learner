@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@pedroloch/tuner": "^1.0.2",
+    "pitchfinder": "^2.3.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-use-microphone-volume-hook": "^1.0.2"
