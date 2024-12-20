@@ -18,6 +18,7 @@ const defaultTunerData: TunerData = {
 
 const volumeThreshold = 30;
 const sampleRate = 44100;
+const nextNotePause = 250;
 
 function getOctave(pitch: number) {
   return Math.floor(Math.log2(pitch / C0));
@@ -153,8 +154,11 @@ function App() {
 }
 
 const PitchDetection: React.FC = () => {
-  const [isListening, setIsRecording] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const [pitch, setPitch] = useState<number | null>(null);
+  const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
+  const [currentNote, setCurrentNote] = useState<Note | null>(null);
+  const [detectedNote, setDetectedNote] = useState<Note | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -167,23 +171,32 @@ const PitchDetection: React.FC = () => {
     maxFrequency: 1500,
   });
 
-  useEffect(() => {
-    return () => {
+  const handlePractice = () => {
+    if (practiceState == "Idle") {
+      startListening();
+      setPracticeState("New Note");
+    } else {
       stopListening();
-    };
-  }, []);
+      setPracticeState("Idle");
+    }
+  };
 
   const startListening = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audioContext = new window.AudioContext({ sampleRate: sampleRate });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+      const audioContext = new window.AudioContext({
+        sampleRate: sampleRate,
+      });
       const source = audioContext.createMediaStreamSource(stream);
 
       const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
       scriptProcessor.onaudioprocess = (event) => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const detectedPitch = detectPitch(inputBuffer);
-        setPitch(detectedPitch || null);
+        setPitch(detectedPitch);
+        setDetectedNote(getNote(detectedPitch));
       };
 
       source.connect(scriptProcessor);
@@ -194,7 +207,9 @@ const PitchDetection: React.FC = () => {
       sourceRef.current = source;
       scriptProcessorRef.current = scriptProcessor;
 
-      setIsRecording(true);
+      if (!isListening) {
+        setIsListening(true);
+      }
     } catch (err) {
       console.error("Error accessing microphone:", err);
     }
@@ -214,25 +229,70 @@ const PitchDetection: React.FC = () => {
       audioContextRef.current.close();
     }
 
-    setIsRecording(false);
+    if (isListening) {
+      setIsListening(false);
+    }
   };
 
-  const note = getNote(pitch);
+  useEffect(() => {
+    console.log("Practice state:", practiceState);
+
+    switch (practiceState) {
+      case "Idle":
+        break;
+      case "New Note":
+        const randomNote = Notes[Math.floor(Math.random() * Notes.length)];
+        setCurrentNote(randomNote);
+        setPracticeState("Listening");
+        break;
+      case "Listening":
+        if (detectedNote) {
+          setPracticeState("Feedback");
+        }
+        break;
+      case "Feedback":
+        console.log("Current note:", currentNote);
+        console.log("Detected note:", detectedNote);
+
+        if (
+          currentNote?.name == detectedNote?.name &&
+          currentNote?.octave == detectedNote?.octave
+        ) {
+          console.log("Correct");
+          setPracticeState("Pause");
+        } else {
+          console.log("Incorrect");
+        }
+        break;
+      case "Pause":
+        setTimeout(() => {
+          setPracticeState("New Note");
+        }, nextNotePause);
+        break;
+    }
+  }, [practiceState, pitch]);
+
+  useEffect(() => {
+    return () => {
+      stopListening();
+    };
+  }, []);
 
   return (
     <div>
       <h1>Guitar Fretboard Learner</h1>
-      <button onClick={isListening ? stopListening : startListening}>
-        {isListening ? "End Practice" : "Start Practice"}
+      <button onClick={handlePractice}>
+        {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
       </button>
-      {pitch && (
-        <div>
-          <h2>Detected Pitch: {pitch.toFixed(2)} Hz</h2>
-          <h2>
-            Note Name: {note?.name}, Octave: {note?.octave}
-          </h2>
-        </div>
-      )}
+      <div>
+        <p>
+          Current Note Name: {currentNote?.name}, Octave: {currentNote?.octave}
+        </p>
+        <p>
+          Detected Note Name: {detectedNote?.name}, Octave:{" "}
+          {detectedNote?.octave}
+        </p>
+      </div>
     </div>
   );
 };
