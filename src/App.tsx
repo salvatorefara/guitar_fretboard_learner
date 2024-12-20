@@ -163,7 +163,18 @@ const App = () => {
     <div>
       <h1>Guitar Fretboard Learner</h1>
       <div>
-        <img src={"notes/the_lick.svg"} className="note" alt="Vite logo" />
+        <img
+          src={
+            practiceState == "Idle"
+              ? "notes/the_lick.svg"
+              : "notes/" +
+                currentNote?.name.toLowerCase() +
+                currentNote?.octave +
+                ".svg"
+          }
+          className="note"
+          alt="Vite logo"
+        />
       </div>
       <div>
         <p>Correct: {correct}</p>
@@ -179,6 +190,12 @@ const App = () => {
         <p>
           Detected Note Name: {detectedNote?.name}, Octave:{" "}
           {detectedNote?.octave}
+        </p>
+        <p>
+          {"notes/" +
+            currentNote?.name.toLowerCase() +
+            currentNote?.octave +
+            ".svg"}
         </p>
       </div>
     </div>
