@@ -8,4 +8,4 @@ export type PracticeState =
   | "New Note"
   | "Listening"
   | "Feedback"
-  | "Pause";
+  | "Wait";
