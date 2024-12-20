@@ -72,7 +72,7 @@ const App = () => {
 
   const imagePath = useMemo(() => {
     if (practiceState === "Idle") {
-      return imageCache.current["idle"]?.src || "";
+      return imageCache.current["idle"]?.src || "notes/the_lick.svg";
     } else if (currentNote) {
       const noteKey = `${currentNote.name.replace("#", "s").toLowerCase()}${
         currentNote.octave
