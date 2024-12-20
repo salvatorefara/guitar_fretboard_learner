@@ -168,7 +168,7 @@ const App = () => {
             practiceState == "Idle"
               ? "notes/the_lick.svg"
               : "notes/" +
-                currentNote?.name.toLowerCase() +
+                currentNote?.name.replace("#", "s").toLowerCase() +
                 currentNote?.octave +
                 ".svg"
           }
