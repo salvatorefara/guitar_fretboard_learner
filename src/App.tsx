@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { YIN } from "pitchfinder";
+import * as Pitchfinder from "pitchfinder";
 import createTuner from "@pedroloch/tuner";
 import { TunerData } from "@pedroloch/tuner/dist/interfaces";
 import useMicrophoneVolume from "react-use-microphone-volume-hook";
-import { C0, Notes } from "./constants";
+import { C0, Notes, NoteNames } from "./constants";
 import { Note, PracticeState } from "./types";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
@@ -17,11 +17,20 @@ const defaultTunerData: TunerData = {
 };
 
 const volumeThreshold = 30;
-
-// const pitchTracker = createTuner();
+const sampleRate = 44100;
 
 function getOctave(pitch: number) {
   return Math.floor(Math.log2(pitch / C0));
+}
+
+function getNote(pitch: number | null): Note | null {
+  if (pitch == null) {
+    return null;
+  }
+  const semitone = Math.round(12 * Math.log2(pitch / C0));
+  const octave = Math.floor(semitone / 12);
+  const noteName = NoteNames[semitone % 12];
+  return { name: noteName, octave: octave };
 }
 
 function delay(ms: number) {
@@ -37,6 +46,7 @@ function App() {
     volume,
     { startTrackingMicrophoneVolume, stopTrackingMicrophoneVolume },
   ] = useMicrophoneVolume();
+  const pitchTracker = createTuner();
 
   const handlePractice = () => {
     if (practiceState == "Idle") {
@@ -51,9 +61,9 @@ function App() {
       const status = startTrackingMicrophoneVolume();
       if (status) setIsListening(true);
     }
-    // if (!pitchTracker.isOn) {
-    //   pitchTracker.start();
-    // }
+    if (!pitchTracker.isOn) {
+      pitchTracker.start();
+    }
   };
 
   const disableListening = () => {
@@ -61,9 +71,9 @@ function App() {
       const status = stopTrackingMicrophoneVolume();
       if (status) setIsListening(false);
     }
-    // if (pitchTracker.isOn) {
-    //   pitchTracker.stop();
-    // }
+    if (pitchTracker.isOn) {
+      pitchTracker.stop();
+    }
   };
 
   useEffect(() => {
@@ -107,12 +117,12 @@ function App() {
     console.log("Listening: ", isListening);
   }, [isListening]);
 
-  // pitchTracker.getData((data) => {
-  //   // if (volume >= volumeThreshold) {
-  //   setTunerData(data);
-  //   setPracticeState("Feedback");
-  //   // }
-  // });
+  pitchTracker.getData((data) => {
+    // if (volume >= volumeThreshold) {
+    setTunerData(data);
+    setPracticeState("Feedback");
+    // }
+  });
 
   return (
     <>
@@ -143,7 +153,7 @@ function App() {
 }
 
 const PitchDetection: React.FC = () => {
-  const [isRecording, setIsRecording] = useState(false);
+  const [isListening, setIsRecording] = useState(false);
   const [pitch, setPitch] = useState<number | null>(null);
 
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -151,26 +161,27 @@ const PitchDetection: React.FC = () => {
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
 
-  const detectPitch = YIN();
+  const detectPitch = Pitchfinder.AMDF({
+    sampleRate: sampleRate,
+    minFrequency: 70,
+    maxFrequency: 1500,
+  });
 
   useEffect(() => {
     return () => {
-      stopRecording();
+      stopListening();
     };
   }, []);
 
-  const startRecording = async () => {
+  const startListening = async () => {
     try {
-      // Request microphone access
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const audioContext = new window.AudioContext();
+      const audioContext = new window.AudioContext({ sampleRate: sampleRate });
       const source = audioContext.createMediaStreamSource(stream);
 
       const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
       scriptProcessor.onaudioprocess = (event) => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
-
-        // Run pitch detection on the current audio frame
         const detectedPitch = detectPitch(inputBuffer);
         setPitch(detectedPitch || null);
       };
@@ -189,7 +200,7 @@ const PitchDetection: React.FC = () => {
     }
   };
 
-  const stopRecording = () => {
+  const stopListening = () => {
     if (mediaStreamRef.current) {
       mediaStreamRef.current.getTracks().forEach((track) => track.stop());
     }
@@ -206,15 +217,20 @@ const PitchDetection: React.FC = () => {
     setIsRecording(false);
   };
 
+  const note = getNote(pitch);
+
   return (
     <div>
-      <h1>Real-Time Pitch Detection</h1>
-      <button onClick={isRecording ? stopRecording : startRecording}>
-        {isRecording ? "Stop Recording" : "Start Recording"}
+      <h1>Guitar Fretboard Learner</h1>
+      <button onClick={isListening ? stopListening : startListening}>
+        {isListening ? "End Practice" : "Start Practice"}
       </button>
       {pitch && (
         <div>
           <h2>Detected Pitch: {pitch.toFixed(2)} Hz</h2>
+          <h2>
+            Note Name: {note?.name}, Octave: {note?.octave}
+          </h2>
         </div>
       )}
     </div>

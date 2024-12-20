@@ -2,6 +2,21 @@ import { Note } from "../types";
 
 export const C0 = 16.35;
 
+export const NoteNames = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
+
 export const Notes: Note[] = [
   { name: "E", octave: 2 },
   { name: "F", octave: 2 },
