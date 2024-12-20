@@ -1,28 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import * as Pitchfinder from "pitchfinder";
-import createTuner from "@pedroloch/tuner";
-import { TunerData } from "@pedroloch/tuner/dist/interfaces";
-import useMicrophoneVolume from "react-use-microphone-volume-hook";
-import { C0, Notes, NoteNames } from "./constants";
+import {
+  AudioBufferSize,
+  C0,
+  NextNotePause,
+  Notes,
+  NoteNames,
+  SampleRate,
+} from "./constants";
 import { Note, PracticeState } from "./types";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
-
-const defaultTunerData: TunerData = {
-  frequency: 0,
-  pitch: 440,
-  note: "A",
-  diff: 0,
-};
-
-const volumeThreshold = 30;
-const sampleRate = 44100;
-const nextNotePause = 250;
-
-function getOctave(pitch: number) {
-  return Math.floor(Math.log2(pitch / C0));
-}
 
 function getNote(pitch: number | null): Note | null {
   if (pitch == null) {
@@ -34,139 +21,31 @@ function getNote(pitch: number | null): Note | null {
   return { name: noteName, octave: octave };
 }
 
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+const calculateRMS = (buffer: Float32Array): number => {
+  let sum = 0;
+  for (let i = 0; i < buffer.length; i++) {
+    sum += buffer[i] * buffer[i];
+  }
+  return Math.sqrt(sum / buffer.length);
+};
 
-function App() {
-  const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
-  const [currentNote, setCurrentNote] = useState<Note>(Notes[0]);
-  const [isListening, setIsListening] = useState(false);
-  const [tunerData, setTunerData] = useState<TunerData>(defaultTunerData);
-  const [
-    volume,
-    { startTrackingMicrophoneVolume, stopTrackingMicrophoneVolume },
-  ] = useMicrophoneVolume();
-  const pitchTracker = createTuner();
-
-  const handlePractice = () => {
-    if (practiceState == "Idle") {
-      setPracticeState("New Note");
-    } else {
-      setPracticeState("Idle");
-    }
-  };
-
-  const enableListening = () => {
-    if (!isListening) {
-      const status = startTrackingMicrophoneVolume();
-      if (status) setIsListening(true);
-    }
-    if (!pitchTracker.isOn) {
-      pitchTracker.start();
-    }
-  };
-
-  const disableListening = () => {
-    if (isListening) {
-      const status = stopTrackingMicrophoneVolume();
-      if (status) setIsListening(false);
-    }
-    if (pitchTracker.isOn) {
-      pitchTracker.stop();
-    }
-  };
-
-  useEffect(() => {
-    console.log("Practice state:", practiceState);
-
-    switch (practiceState) {
-      case "Idle":
-        disableListening();
-        break;
-      case "New Note":
-        const randomNote = Notes[Math.floor(Math.random() * Notes.length)];
-        setCurrentNote(randomNote);
-        setPracticeState("Listening");
-        break;
-      case "Listening":
-        enableListening();
-        break;
-      case "Feedback":
-        disableListening();
-        console.log(currentNote.name, tunerData.note);
-        console.log(currentNote.octave, getOctave(tunerData.pitch));
-        setPracticeState("Pause");
-        // if (
-        //   currentNote.name == tunerData.note &&
-        //   currentNote.octave == getOctave(tunerData.pitch)
-        // ) {
-        //   console.log("Correct");
-        // } else {
-        //   console.log("Incorrect");
-        // }
-        break;
-      case "Pause":
-        setTimeout(() => {
-          setPracticeState("New Note");
-        }, 100);
-        break;
-    }
-  }, [practiceState]);
-
-  useEffect(() => {
-    console.log("Listening: ", isListening);
-  }, [isListening]);
-
-  pitchTracker.getData((data) => {
-    // if (volume >= volumeThreshold) {
-    setTunerData(data);
-    setPracticeState("Feedback");
-    // }
-  });
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={handlePractice}>
-          {practiceState == "Idle" ? "Start practice" : "Stop practice"}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Volume {volume},
-        {/* Tuner {tunerData.note} {tunerData.pitch}, Octave {getOctave(tunerData.pitch)},  */}
-        Random Note {currentNote.name} {currentNote.octave}
-      </p>
-    </>
-  );
-}
-
-const PitchDetection: React.FC = () => {
-  const [isListening, setIsListening] = useState(false);
+const App = () => {
   const [pitch, setPitch] = useState<number | null>(null);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [detectedNote, setDetectedNote] = useState<Note | null>(null);
+  const [correct, setCorrect] = useState(0);
+  const [incorrect, setIncorrect] = useState(0);
+  const [isNewPitch, setIsNewPitch] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const previousPitchRMSRef = useRef(0);
 
   const detectPitch = Pitchfinder.AMDF({
-    sampleRate: sampleRate,
+    sampleRate: SampleRate,
     minFrequency: 70,
     maxFrequency: 1500,
   });
@@ -175,6 +54,8 @@ const PitchDetection: React.FC = () => {
     if (practiceState == "Idle") {
       startListening();
       setPracticeState("New Note");
+      setCorrect(0);
+      setIncorrect(0);
     } else {
       stopListening();
       setPracticeState("Idle");
@@ -187,16 +68,33 @@ const PitchDetection: React.FC = () => {
         audio: true,
       });
       const audioContext = new window.AudioContext({
-        sampleRate: sampleRate,
+        sampleRate: SampleRate,
       });
       const source = audioContext.createMediaStreamSource(stream);
 
-      const scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+      const scriptProcessor = audioContext.createScriptProcessor(
+        AudioBufferSize,
+        1,
+        1
+      );
       scriptProcessor.onaudioprocess = (event) => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const detectedPitch = detectPitch(inputBuffer);
         setPitch(detectedPitch);
         setDetectedNote(getNote(detectedPitch));
+
+        // if (detectedPitch) {
+        //   const currentPitchRMS = calculateRMS(inputBuffer);
+        //   if (currentPitchRMS > previousPitchRMSRef.current) {
+        //     setIsNewPitch(true);
+        //   } else {
+        //     setIsNewPitch(false);
+        //   }
+        //   previousPitchRMSRef.current = currentPitchRMS;
+        // } else {
+        //   setIsNewPitch(false);
+        //   previousPitchRMSRef.current = 0;
+        // }
       };
 
       source.connect(scriptProcessor);
@@ -206,10 +104,6 @@ const PitchDetection: React.FC = () => {
       audioContextRef.current = audioContext;
       sourceRef.current = source;
       scriptProcessorRef.current = scriptProcessor;
-
-      if (!isListening) {
-        setIsListening(true);
-      }
     } catch (err) {
       console.error("Error accessing microphone:", err);
     }
@@ -228,10 +122,6 @@ const PitchDetection: React.FC = () => {
     if (audioContextRef.current) {
       audioContextRef.current.close();
     }
-
-    if (isListening) {
-      setIsListening(false);
-    }
   };
 
   useEffect(() => {
@@ -246,41 +136,39 @@ const PitchDetection: React.FC = () => {
         setPracticeState("Listening");
         break;
       case "Listening":
+        // if (detectedNote && isNewPitch) {
         if (detectedNote) {
           setPracticeState("Feedback");
         }
         break;
       case "Feedback":
-        console.log("Current note:", currentNote);
-        console.log("Detected note:", detectedNote);
-
         if (
           currentNote?.name == detectedNote?.name &&
           currentNote?.octave == detectedNote?.octave
         ) {
-          console.log("Correct");
-          setPracticeState("Pause");
+          setCorrect((correct) => correct + 1);
         } else {
-          console.log("Incorrect");
+          setIncorrect((incorrect) => incorrect + 1);
         }
+        setPracticeState("Wait");
         break;
-      case "Pause":
+      case "Wait":
         setTimeout(() => {
           setPracticeState("New Note");
-        }, nextNotePause);
-        break;
+        }, NextNotePause);
     }
-  }, [practiceState, pitch]);
-
-  useEffect(() => {
-    return () => {
-      stopListening();
-    };
-  }, []);
+  }, [practiceState, isNewPitch, detectedNote]);
 
   return (
     <div>
       <h1>Guitar Fretboard Learner</h1>
+      <div>
+        <img src={"notes/the_lick.svg"} className="note" alt="Vite logo" />
+      </div>
+      <div>
+        <p>Correct: {correct}</p>
+        <p>Incorrect: {incorrect}</p>
+      </div>
       <button onClick={handlePractice}>
         {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
       </button>
@@ -297,6 +185,4 @@ const PitchDetection: React.FC = () => {
   );
 };
 
-export default PitchDetection;
-
-// export default App;
+export default App;

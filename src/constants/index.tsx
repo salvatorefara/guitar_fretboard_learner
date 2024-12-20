@@ -64,3 +64,9 @@ export const Notes: Note[] = [
   { name: "B", octave: 5 },
   { name: "C", octave: 6 },
 ];
+
+export const SampleRate = 44100;
+
+export const NextNotePause = 250;
+
+export const AudioBufferSize = 4096;
