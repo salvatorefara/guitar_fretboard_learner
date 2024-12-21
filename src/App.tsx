@@ -201,12 +201,7 @@ const App = () => {
         } else {
           setIncorrect((incorrect) => incorrect + 1);
         }
-        setPracticeState("Wait");
-        setTimeout(() => {
-          setPracticeState("New Note");
-        }, NextNotePause);
-        break;
-      case "Wait":
+        setPracticeState("New Note");
         break;
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
