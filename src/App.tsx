@@ -43,6 +43,8 @@ const App = () => {
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
   const [isNewPitch, setIsNewPitch] = useState(false);
+  const [newNoteTimestamp, setNewNoteTimestamp] = useState(0);
+  const [oldNoteTimestamp, setOldNoteTimestamp] = useState(0);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -76,12 +78,9 @@ const App = () => {
 
   const imagePath = useMemo(() => {
     if (practiceState === "Idle") {
-      return imageCache.current["idle"]?.src || "notes/the_lick.svg";
+      return imageCache.current[noteToImage(null)]?.src || "notes/the_lick.svg";
     } else if (currentNote) {
-      const noteKey = `${currentNote.name.replace("#", "s").toLowerCase()}${
-        currentNote.octave
-      }`;
-      return imageCache.current[noteKey]?.src || "";
+      return imageCache.current[noteToImage(currentNote)]?.src || "";
     }
     return "";
   }, [practiceState, currentNote]);
@@ -125,6 +124,7 @@ const App = () => {
           previousPitchRMSRef.current = 0.02;
         } else if (pitchRMS > 0.02 + previousPitchRMSRef.current) {
           console.log("New note!");
+          setNewNoteTimestamp(Date.now());
           previousPitchRMSRef.current = pitchRMS;
         } else {
           pitchIsRingingRef.current = true;
@@ -187,8 +187,8 @@ const App = () => {
         setPracticeState("Listening");
         break;
       case "Listening":
-        // if (detectedNote && isNewPitch) {
-        if (detectedNote) {
+        if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
+          setOldNoteTimestamp(newNoteTimestamp);
           setPracticeState("Feedback");
         }
         break;
@@ -209,21 +209,13 @@ const App = () => {
       case "Wait":
         break;
     }
-  }, [practiceState, isNewPitch, detectedNote]);
+  }, [practiceState, newNoteTimestamp, detectedNote]);
 
   return (
     <div>
       <h1>Guitar Fretboard Learner</h1>
       <div>
-        <img
-          src={imagePath}
-          className="note"
-          alt={
-            currentNote
-              ? `${currentNote.name}${currentNote.octave}`
-              : "Note Image"
-          }
-        />
+        <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
       </div>
       <div>
         <p>Correct: {correct}</p>
@@ -239,12 +231,6 @@ const App = () => {
         <p>
           Detected Note Name: {detectedNote?.name}, Octave:{" "}
           {detectedNote?.octave}
-        </p>
-        <p>
-          {"notes/" +
-            currentNote?.name.toLowerCase() +
-            currentNote?.octave +
-            ".svg"}
         </p>
       </div>
     </div>
