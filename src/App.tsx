@@ -62,13 +62,15 @@ const App = () => {
 
   const preloadImages = () => {
     const idleImage = new Image();
-    idleImage.src = noteToImage(null);
-    imageCache.current[idleImage.src] = idleImage;
+    const src = noteToImage(null);
+    idleImage.src = src;
+    imageCache.current[src] = idleImage;
 
     Notes.forEach((note) => {
       const img = new Image();
-      img.src = noteToImage(note);
-      imageCache.current[img.src] = img;
+      const src = noteToImage(note);
+      img.src = src;
+      imageCache.current[src] = img;
     });
   };
 
