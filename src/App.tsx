@@ -21,6 +21,12 @@ function getNote(pitch: number | null): Note | null {
   return { name: noteName, octave: octave };
 }
 
+function noteToImage(note: Note | null): string {
+  return note
+    ? `notes/${note.name.replace("#", "s").toLowerCase()}${note.octave}.svg`
+    : "notes/the_lick.svg";
+}
+
 const calculateRMS = (buffer: Float32Array): number => {
   let sum = 0;
   for (let i = 0; i < buffer.length; i++) {
@@ -53,16 +59,13 @@ const App = () => {
 
   const preloadImages = () => {
     const idleImage = new Image();
-    idleImage.src = "notes/the_lick.svg";
-    imageCache.current["idle"] = idleImage;
+    idleImage.src = noteToImage(null);
+    imageCache.current[idleImage.src] = idleImage;
 
     Notes.forEach((note) => {
       const img = new Image();
-      const noteKey = `${note.name.replace("#", "s").toLowerCase()}${
-        note.octave
-      }`;
-      img.src = `notes/${noteKey}.svg`;
-      imageCache.current[noteKey] = img;
+      img.src = noteToImage(note);
+      imageCache.current[img.src] = img;
     });
   };
 
@@ -185,11 +188,12 @@ const App = () => {
           setIncorrect((incorrect) => incorrect + 1);
         }
         setPracticeState("Wait");
-        break;
-      case "Wait":
         setTimeout(() => {
           setPracticeState("New Note");
         }, NextNotePause);
+        break;
+      case "Wait":
+        break;
     }
   }, [practiceState, isNewPitch, detectedNote]);
 
