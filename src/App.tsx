@@ -48,6 +48,7 @@ const App = () => {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const pitchIsRingingRef = useRef(false);
   const previousPitchRMSRef = useRef(0);
   const imageCache = useRef<{ [key: string]: HTMLImageElement }>({});
 
@@ -116,9 +117,22 @@ const App = () => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const inputRMS = calculateRMS(inputBuffer);
         const detectedPitch = inputRMS > 0.01 ? detectPitch(inputBuffer) : null;
+        const pitchRMS = calculateRMS(inputBuffer);
+        const note = getNote(detectedPitch);
+
+        if (!detectedPitch) {
+          pitchIsRingingRef.current = false;
+          previousPitchRMSRef.current = 0.02;
+        } else if (pitchRMS > 0.02 + previousPitchRMSRef.current) {
+          console.log("New note!");
+          previousPitchRMSRef.current = pitchRMS;
+        } else {
+          pitchIsRingingRef.current = true;
+          previousPitchRMSRef.current = pitchRMS;
+        }
 
         setPitch(detectedPitch);
-        setDetectedNote(getNote(detectedPitch));
+        setDetectedNote(note);
 
         // if (detectedPitch) {
         //   const currentPitchRMS = calculateRMS(inputBuffer);
