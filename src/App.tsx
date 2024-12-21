@@ -185,11 +185,12 @@ const App = () => {
           setIncorrect((incorrect) => incorrect + 1);
         }
         setPracticeState("Wait");
-        break;
-      case "Wait":
         setTimeout(() => {
           setPracticeState("New Note");
         }, NextNotePause);
+        break;
+      case "Wait":
+        break;
     }
   }, [practiceState, isNewPitch, detectedNote]);
 
