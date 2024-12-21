@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import * as Pitchfinder from "pitchfinder";
 import {
   AudioBufferSize,
@@ -43,12 +43,44 @@ const App = () => {
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
   const previousPitchRMSRef = useRef(0);
+  const imageCache = useRef<{ [key: string]: HTMLImageElement }>({});
 
   const detectPitch = Pitchfinder.AMDF({
     sampleRate: SampleRate,
     minFrequency: 70,
     maxFrequency: 1500,
   });
+
+  const preloadImages = () => {
+    const idleImage = new Image();
+    idleImage.src = "notes/the_lick.svg";
+    imageCache.current["idle"] = idleImage;
+
+    Notes.forEach((note) => {
+      const img = new Image();
+      const noteKey = `${note.name.replace("#", "s").toLowerCase()}${
+        note.octave
+      }`;
+      img.src = `notes/${noteKey}.svg`;
+      imageCache.current[noteKey] = img;
+    });
+  };
+
+  useEffect(() => {
+    preloadImages();
+  }, []);
+
+  const imagePath = useMemo(() => {
+    if (practiceState === "Idle") {
+      return imageCache.current["idle"]?.src || "notes/the_lick.svg";
+    } else if (currentNote) {
+      const noteKey = `${currentNote.name.replace("#", "s").toLowerCase()}${
+        currentNote.octave
+      }`;
+      return imageCache.current[noteKey]?.src || "";
+    }
+    return "";
+  }, [practiceState, currentNote]);
 
   const handlePractice = () => {
     if (practiceState == "Idle") {
@@ -79,7 +111,9 @@ const App = () => {
       );
       scriptProcessor.onaudioprocess = (event) => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
-        const detectedPitch = detectPitch(inputBuffer);
+        const inputRMS = calculateRMS(inputBuffer);
+        const detectedPitch = inputRMS > 0.01 ? detectPitch(inputBuffer) : null;
+
         setPitch(detectedPitch);
         setDetectedNote(getNote(detectedPitch));
 
@@ -163,7 +197,15 @@ const App = () => {
     <div>
       <h1>Guitar Fretboard Learner</h1>
       <div>
-        <img src={"notes/the_lick.svg"} className="note" alt="Vite logo" />
+        <img
+          src={imagePath}
+          className="note"
+          alt={
+            currentNote
+              ? `${currentNote.name}${currentNote.octave}`
+              : "Note Image"
+          }
+        />
       </div>
       <div>
         <p>Correct: {correct}</p>
@@ -179,6 +221,12 @@ const App = () => {
         <p>
           Detected Note Name: {detectedNote?.name}, Octave:{" "}
           {detectedNote?.octave}
+        </p>
+        <p>
+          {"notes/" +
+            currentNote?.name.toLowerCase() +
+            currentNote?.octave +
+            ".svg"}
         </p>
       </div>
     </div>
