@@ -3,7 +3,8 @@ import * as Pitchfinder from "pitchfinder";
 import {
   AudioBufferSize,
   C0,
-  NextNotePause,
+  minPitchRMS,
+  minPitchRMSDiff,
   Notes,
   NoteNames,
   SampleRate,
@@ -36,13 +37,11 @@ const calculateRMS = (buffer: Float32Array): number => {
 };
 
 const App = () => {
-  const [pitch, setPitch] = useState<number | null>(null);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [detectedNote, setDetectedNote] = useState<Note | null>(null);
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
-  const [isNewPitch, setIsNewPitch] = useState(false);
   const [newNoteTimestamp, setNewNoteTimestamp] = useState(0);
   const [oldNoteTimestamp, setOldNoteTimestamp] = useState(0);
 
@@ -50,7 +49,6 @@ const App = () => {
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
-  const pitchIsRingingRef = useRef(false);
   const previousPitchRMSRef = useRef(0);
   const imageCache = useRef<{ [key: string]: HTMLImageElement }>({});
 
@@ -117,37 +115,22 @@ const App = () => {
       scriptProcessor.onaudioprocess = (event) => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const inputRMS = calculateRMS(inputBuffer);
-        const detectedPitch = inputRMS > 0.01 ? detectPitch(inputBuffer) : null;
+        const detectedPitch =
+          inputRMS > minPitchRMS ? detectPitch(inputBuffer) : null;
         const pitchRMS = calculateRMS(inputBuffer);
         const note = getNote(detectedPitch);
 
         if (!detectedPitch) {
-          pitchIsRingingRef.current = false;
-          previousPitchRMSRef.current = 0.02;
-        } else if (pitchRMS > 0.02 + previousPitchRMSRef.current) {
+          previousPitchRMSRef.current = minPitchRMS;
+        } else if (pitchRMS > minPitchRMSDiff + previousPitchRMSRef.current) {
           console.log("New note!");
           setNewNoteTimestamp(Date.now());
           previousPitchRMSRef.current = pitchRMS;
         } else {
-          pitchIsRingingRef.current = true;
           previousPitchRMSRef.current = pitchRMS;
         }
 
-        setPitch(detectedPitch);
         setDetectedNote(note);
-
-        // if (detectedPitch) {
-        //   const currentPitchRMS = calculateRMS(inputBuffer);
-        //   if (currentPitchRMS > previousPitchRMSRef.current) {
-        //     setIsNewPitch(true);
-        //   } else {
-        //     setIsNewPitch(false);
-        //   }
-        //   previousPitchRMSRef.current = currentPitchRMS;
-        // } else {
-        //   setIsNewPitch(false);
-        //   previousPitchRMSRef.current = 0;
-        // }
       };
 
       source.connect(scriptProcessor);
