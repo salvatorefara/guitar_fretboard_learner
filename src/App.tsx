@@ -37,6 +37,7 @@ const calculateRMS = (buffer: Float32Array): number => {
 };
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [detectedNote, setDetectedNote] = useState<Note | null>(null);
@@ -58,6 +59,26 @@ const App = () => {
     maxFrequency: 1500,
   });
 
+  const cacheImages = async (): Promise<void> => {
+    const idleImage = new Image();
+    const src = noteToImage(null);
+    idleImage.src = src;
+    imageCache.current[src] = idleImage;
+
+    const promises = Notes.map((note) => {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        const src = noteToImage(note);
+        img.src = src;
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+        imageCache.current[src] = img;
+      });
+    });
+    await Promise.all(promises);
+    setIsLoading(false);
+  };
+
   const preloadImages = () => {
     const idleImage = new Image();
     const src = noteToImage(null);
@@ -73,7 +94,7 @@ const App = () => {
   };
 
   useEffect(() => {
-    preloadImages();
+    cacheImages();
   }, []);
 
   const imagePath = useMemo(() => {
@@ -191,30 +212,46 @@ const App = () => {
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
 
-  return (
-    <div>
-      <h1>Guitar Fretboard Learner</h1>
+  if (isLoading) {
+    return (
       <div>
-        <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
+        <h1>Guitar Fretboard Learner</h1>
+        <div>
+          <p>Loading ...</p>
+        </div>
       </div>
+    );
+  } else {
+    return (
       <div>
-        <p>Correct: {correct}</p>
-        <p>Incorrect: {incorrect}</p>
+        <h1>Guitar Fretboard Learner</h1>
+        <div>
+          <img
+            src={imagePath}
+            className="note"
+            alt={noteToImage(currentNote)}
+          />
+        </div>
+        <div>
+          <p>Correct: {correct}</p>
+          <p>Incorrect: {incorrect}</p>
+        </div>
+        <button onClick={handlePractice}>
+          {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
+        </button>
+        <div>
+          <p>
+            Current Note Name: {currentNote?.name}, Octave:{" "}
+            {currentNote?.octave}
+          </p>
+          <p>
+            Detected Note Name: {detectedNote?.name}, Octave:{" "}
+            {detectedNote?.octave}
+          </p>
+        </div>
       </div>
-      <button onClick={handlePractice}>
-        {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
-      </button>
-      <div>
-        <p>
-          Current Note Name: {currentNote?.name}, Octave: {currentNote?.octave}
-        </p>
-        <p>
-          Detected Note Name: {detectedNote?.name}, Octave:{" "}
-          {detectedNote?.octave}
-        </p>
-      </div>
-    </div>
-  );
+    );
+  }
 };
 
 export default App;
