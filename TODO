@@ -1,0 +1,7 @@
+- add spinner when loading app (images)
+- make larger display of correct/incorrect
+- add fret/note range selector
+- add count down on start
+- add option to show note name together with image
+- add option to stay on same note or continue to new note after a mistake
+- show accuracy (correct/(correct + incorrect))
