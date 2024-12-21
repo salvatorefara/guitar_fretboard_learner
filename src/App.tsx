@@ -3,7 +3,8 @@ import * as Pitchfinder from "pitchfinder";
 import {
   AudioBufferSize,
   C0,
-  NextNotePause,
+  minPitchRMS,
+  minPitchRMSDiff,
   Notes,
   NoteNames,
   SampleRate,
@@ -36,13 +37,13 @@ const calculateRMS = (buffer: Float32Array): number => {
 };
 
 const App = () => {
-  const [pitch, setPitch] = useState<number | null>(null);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [detectedNote, setDetectedNote] = useState<Note | null>(null);
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
-  const [isNewPitch, setIsNewPitch] = useState(false);
+  const [newNoteTimestamp, setNewNoteTimestamp] = useState(0);
+  const [oldNoteTimestamp, setOldNoteTimestamp] = useState(0);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
@@ -59,13 +60,15 @@ const App = () => {
 
   const preloadImages = () => {
     const idleImage = new Image();
-    idleImage.src = noteToImage(null);
-    imageCache.current[idleImage.src] = idleImage;
+    const src = noteToImage(null);
+    idleImage.src = src;
+    imageCache.current[src] = idleImage;
 
     Notes.forEach((note) => {
       const img = new Image();
-      img.src = noteToImage(note);
-      imageCache.current[img.src] = img;
+      const src = noteToImage(note);
+      img.src = src;
+      imageCache.current[src] = img;
     });
   };
 
@@ -75,12 +78,9 @@ const App = () => {
 
   const imagePath = useMemo(() => {
     if (practiceState === "Idle") {
-      return imageCache.current["idle"]?.src || "notes/the_lick.svg";
+      return imageCache.current[noteToImage(null)]?.src || "notes/the_lick.svg";
     } else if (currentNote) {
-      const noteKey = `${currentNote.name.replace("#", "s").toLowerCase()}${
-        currentNote.octave
-      }`;
-      return imageCache.current[noteKey]?.src || "";
+      return imageCache.current[noteToImage(currentNote)]?.src || "";
     }
     return "";
   }, [practiceState, currentNote]);
@@ -115,23 +115,22 @@ const App = () => {
       scriptProcessor.onaudioprocess = (event) => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const inputRMS = calculateRMS(inputBuffer);
-        const detectedPitch = inputRMS > 0.01 ? detectPitch(inputBuffer) : null;
+        const detectedPitch =
+          inputRMS > minPitchRMS ? detectPitch(inputBuffer) : null;
+        const pitchRMS = calculateRMS(inputBuffer);
+        const note = getNote(detectedPitch);
 
-        setPitch(detectedPitch);
-        setDetectedNote(getNote(detectedPitch));
+        if (!detectedPitch) {
+          previousPitchRMSRef.current = minPitchRMS;
+        } else if (pitchRMS > minPitchRMSDiff + previousPitchRMSRef.current) {
+          console.log("New note!");
+          setNewNoteTimestamp(Date.now());
+          previousPitchRMSRef.current = pitchRMS;
+        } else {
+          previousPitchRMSRef.current = pitchRMS;
+        }
 
-        // if (detectedPitch) {
-        //   const currentPitchRMS = calculateRMS(inputBuffer);
-        //   if (currentPitchRMS > previousPitchRMSRef.current) {
-        //     setIsNewPitch(true);
-        //   } else {
-        //     setIsNewPitch(false);
-        //   }
-        //   previousPitchRMSRef.current = currentPitchRMS;
-        // } else {
-        //   setIsNewPitch(false);
-        //   previousPitchRMSRef.current = 0;
-        // }
+        setDetectedNote(note);
       };
 
       source.connect(scriptProcessor);
@@ -173,8 +172,8 @@ const App = () => {
         setPracticeState("Listening");
         break;
       case "Listening":
-        // if (detectedNote && isNewPitch) {
-        if (detectedNote) {
+        if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
+          setOldNoteTimestamp(newNoteTimestamp);
           setPracticeState("Feedback");
         }
         break;
@@ -187,29 +186,16 @@ const App = () => {
         } else {
           setIncorrect((incorrect) => incorrect + 1);
         }
-        setPracticeState("Wait");
-        setTimeout(() => {
-          setPracticeState("New Note");
-        }, NextNotePause);
-        break;
-      case "Wait":
+        setPracticeState("New Note");
         break;
     }
-  }, [practiceState, isNewPitch, detectedNote]);
+  }, [practiceState, newNoteTimestamp, detectedNote]);
 
   return (
     <div>
       <h1>Guitar Fretboard Learner</h1>
       <div>
-        <img
-          src={imagePath}
-          className="note"
-          alt={
-            currentNote
-              ? `${currentNote.name}${currentNote.octave}`
-              : "Note Image"
-          }
-        />
+        <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
       </div>
       <div>
         <p>Correct: {correct}</p>
@@ -225,12 +211,6 @@ const App = () => {
         <p>
           Detected Note Name: {detectedNote?.name}, Octave:{" "}
           {detectedNote?.octave}
-        </p>
-        <p>
-          {"notes/" +
-            currentNote?.name.toLowerCase() +
-            currentNote?.octave +
-            ".svg"}
         </p>
       </div>
     </div>

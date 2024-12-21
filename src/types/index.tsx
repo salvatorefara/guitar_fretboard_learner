@@ -3,9 +3,4 @@ export type Note = {
   octave: number;
 };
 
-export type PracticeState =
-  | "Idle"
-  | "New Note"
-  | "Listening"
-  | "Feedback"
-  | "Wait";
+export type PracticeState = "Idle" | "New Note" | "Listening" | "Feedback";
