@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import * as Pitchfinder from "pitchfinder";
+import { CircularProgress } from "@mui/material";
 import { calculateRMS, getNote, noteToImage } from "./utils";
 import {
   AudioBufferSize,
@@ -178,7 +179,7 @@ const App = () => {
       <div>
         <h1>Guitar Fretboard Learner</h1>
         <div>
-          <p>Loading ...</p>
+          <CircularProgress color="inherit" />
         </div>
       </div>
     );
