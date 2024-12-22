@@ -9,7 +9,7 @@ import {
   SampleRate,
 } from "./constants";
 import { Note, PracticeState } from "./types";
-import "./App.css";
+import "./styles/App.css";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
