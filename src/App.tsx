@@ -1,40 +1,15 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import * as Pitchfinder from "pitchfinder";
+import { calculateRMS, getNote, noteToImage } from "./utils";
 import {
   AudioBufferSize,
-  C0,
   minPitchRMS,
   minPitchRMSDiff,
   Notes,
-  NoteNames,
   SampleRate,
 } from "./constants";
 import { Note, PracticeState } from "./types";
 import "./App.css";
-
-function getNote(pitch: number | null): Note | null {
-  if (pitch == null) {
-    return null;
-  }
-  const semitone = Math.round(12 * Math.log2(pitch / C0));
-  const octave = Math.floor(semitone / 12);
-  const noteName = NoteNames[semitone % 12];
-  return { name: noteName, octave: octave };
-}
-
-function noteToImage(note: Note | null): string {
-  return note
-    ? `notes/${note.name.replace("#", "s").toLowerCase()}${note.octave}.svg`
-    : "notes/the_lick.svg";
-}
-
-const calculateRMS = (buffer: Float32Array): number => {
-  let sum = 0;
-  for (let i = 0; i < buffer.length; i++) {
-    sum += buffer[i] * buffer[i];
-  }
-  return Math.sqrt(sum / buffer.length);
-};
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
