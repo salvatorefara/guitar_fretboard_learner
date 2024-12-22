@@ -54,20 +54,6 @@ const App = () => {
     setIsLoading(false);
   };
 
-  const preloadImages = () => {
-    const idleImage = new Image();
-    const src = noteToImage(null);
-    idleImage.src = src;
-    imageCache.current[src] = idleImage;
-
-    Notes.forEach((note) => {
-      const img = new Image();
-      const src = noteToImage(note);
-      img.src = src;
-      imageCache.current[src] = img;
-    });
-  };
-
   useEffect(() => {
     cacheImages();
   }, []);
