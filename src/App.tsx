@@ -1,42 +1,23 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import * as Pitchfinder from "pitchfinder";
+import Button from "@mui/material/Button";
+import { CircularProgress } from "@mui/material";
+import Typography from "@mui/material/Typography";
+import Header from "./components/Header";
+import Score from "./components/Score";
+import { calculateRMS, getNote, noteToImage } from "./utils";
 import {
   AudioBufferSize,
-  C0,
   minPitchRMS,
   minPitchRMSDiff,
   Notes,
-  NoteNames,
   SampleRate,
 } from "./constants";
 import { Note, PracticeState } from "./types";
-import "./App.css";
-
-function getNote(pitch: number | null): Note | null {
-  if (pitch == null) {
-    return null;
-  }
-  const semitone = Math.round(12 * Math.log2(pitch / C0));
-  const octave = Math.floor(semitone / 12);
-  const noteName = NoteNames[semitone % 12];
-  return { name: noteName, octave: octave };
-}
-
-function noteToImage(note: Note | null): string {
-  return note
-    ? `notes/${note.name.replace("#", "s").toLowerCase()}${note.octave}.svg`
-    : "notes/the_lick.svg";
-}
-
-const calculateRMS = (buffer: Float32Array): number => {
-  let sum = 0;
-  for (let i = 0; i < buffer.length; i++) {
-    sum += buffer[i] * buffer[i];
-  }
-  return Math.sqrt(sum / buffer.length);
-};
+import "./styles/App.css";
 
 const App = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [detectedNote, setDetectedNote] = useState<Note | null>(null);
@@ -58,22 +39,28 @@ const App = () => {
     maxFrequency: 1500,
   });
 
-  const preloadImages = () => {
+  const cacheImages = async (): Promise<void> => {
     const idleImage = new Image();
     const src = noteToImage(null);
     idleImage.src = src;
     imageCache.current[src] = idleImage;
 
-    Notes.forEach((note) => {
-      const img = new Image();
-      const src = noteToImage(note);
-      img.src = src;
-      imageCache.current[src] = img;
+    const promises = Notes.map((note) => {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        const src = noteToImage(note);
+        img.src = src;
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+        imageCache.current[src] = img;
+      });
     });
+    await Promise.all(promises);
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    preloadImages();
+    cacheImages();
   }, []);
 
   const imagePath = useMemo(() => {
@@ -191,30 +178,34 @@ const App = () => {
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
 
-  return (
-    <div>
-      <h1>Guitar Fretboard Learner</h1>
-      <div>
-        <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
+  if (isLoading) {
+    return (
+      <div className="app">
+        <Header />
+        <CircularProgress color="inherit" />
       </div>
-      <div>
-        <p>Correct: {correct}</p>
-        <p>Incorrect: {incorrect}</p>
+    );
+  } else {
+    return (
+      <div className="app">
+        <Header />
+        <div>
+          <img
+            src={imagePath}
+            className="note"
+            alt={noteToImage(currentNote)}
+          />
+        </div>
+        <Typography variant="h2">
+          {practiceState != "Idle" ? currentNote?.name : ""}
+        </Typography>
+        <Score correct={correct} incorrect={incorrect} />
+        <Button className="button" variant="contained" onClick={handlePractice}>
+          {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
+        </Button>
       </div>
-      <button onClick={handlePractice}>
-        {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
-      </button>
-      <div>
-        <p>
-          Current Note Name: {currentNote?.name}, Octave: {currentNote?.octave}
-        </p>
-        <p>
-          Detected Note Name: {detectedNote?.name}, Octave:{" "}
-          {detectedNote?.octave}
-        </p>
-      </div>
-    </div>
-  );
+    );
+  }
 };
 
 export default App;
