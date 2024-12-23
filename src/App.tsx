@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import { CircularProgress } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Header from "./components/Header";
+import Score from "./components/Score";
 import { calculateRMS, getNote, noteToImage } from "./utils";
 import {
   AudioBufferSize,
@@ -181,9 +182,7 @@ const App = () => {
     return (
       <div className="app">
         <Header />
-        <div>
-          <CircularProgress color="inherit" />
-        </div>
+        <CircularProgress color="inherit" />
       </div>
     );
   } else {
@@ -198,10 +197,7 @@ const App = () => {
           />
         </div>
         <Typography variant="h2">{currentNote?.name}</Typography>
-        <div>
-          <p>Correct: {correct}</p>
-          <p>Incorrect: {incorrect}</p>
-        </div>
+        <Score correct={correct} incorrect={incorrect} />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
         </Button>
