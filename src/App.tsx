@@ -196,7 +196,9 @@ const App = () => {
             alt={noteToImage(currentNote)}
           />
         </div>
-        <Typography variant="h2">{currentNote?.name}</Typography>
+        <Typography variant="h2">
+          {practiceState != "Idle" ? currentNote?.name : ""}
+        </Typography>
         <Score correct={correct} incorrect={incorrect} />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
