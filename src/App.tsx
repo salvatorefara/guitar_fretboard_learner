@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import * as Pitchfinder from "pitchfinder";
+import Button from "@mui/material/Button";
 import { CircularProgress } from "@mui/material";
+import Typography from "@mui/material/Typography";
 import Header from "./components/Header";
 import { calculateRMS, getNote, noteToImage } from "./utils";
 import {
@@ -195,14 +197,14 @@ const App = () => {
             alt={noteToImage(currentNote)}
           />
         </div>
-        <div>{currentNote?.name}</div>
+        <Typography variant="h2">{currentNote?.name}</Typography>
         <div>
           <p>Correct: {correct}</p>
           <p>Incorrect: {incorrect}</p>
         </div>
-        <button onClick={handlePractice}>
+        <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
-        </button>
+        </Button>
       </div>
     );
   }
