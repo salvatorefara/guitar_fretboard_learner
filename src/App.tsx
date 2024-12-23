@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import * as Pitchfinder from "pitchfinder";
 import { CircularProgress } from "@mui/material";
+import Header from "./components/Header";
 import { calculateRMS, getNote, noteToImage } from "./utils";
 import {
   AudioBufferSize,
@@ -176,8 +177,8 @@ const App = () => {
 
   if (isLoading) {
     return (
-      <div>
-        <h1>Guitar Fretboard Learner</h1>
+      <div className="app">
+        <Header />
         <div>
           <CircularProgress color="inherit" />
         </div>
@@ -185,8 +186,8 @@ const App = () => {
     );
   } else {
     return (
-      <div>
-        <h1>Guitar Fretboard Learner</h1>
+      <div className="app">
+        <Header />
         <div>
           <img
             src={imagePath}
@@ -194,6 +195,7 @@ const App = () => {
             alt={noteToImage(currentNote)}
           />
         </div>
+        <div>{currentNote?.name}</div>
         <div>
           <p>Correct: {correct}</p>
           <p>Incorrect: {incorrect}</p>
@@ -201,16 +203,6 @@ const App = () => {
         <button onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
         </button>
-        <div>
-          <p>
-            Current Note Name: {currentNote?.name}, Octave:{" "}
-            {currentNote?.octave}
-          </p>
-          <p>
-            Detected Note Name: {detectedNote?.name}, Octave:{" "}
-            {detectedNote?.octave}
-          </p>
-        </div>
       </div>
     );
   }
