@@ -20,6 +20,7 @@ import "./styles/App.css";
 const App = () => {
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [showNoteName, setShowNoteName] = useState(true);
+  const [changeNoteOnMistake, setChangeNoteOnMistake] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
@@ -173,10 +174,15 @@ const App = () => {
           currentNote?.octave == detectedNote?.octave
         ) {
           setCorrect((correct) => correct + 1);
+          setPracticeState("New Note");
         } else {
           setIncorrect((incorrect) => incorrect + 1);
+          if (changeNoteOnMistake) {
+            setPracticeState("New Note");
+          } else {
+            setPracticeState("Listening");
+          }
         }
-        setPracticeState("New Note");
         break;
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
@@ -211,6 +217,8 @@ const App = () => {
           setOpen={setSettingsOpen}
           showNoteName={showNoteName}
           setShowNoteName={setShowNoteName}
+          changeNoteOnMistake={changeNoteOnMistake}
+          setChangeNoteOnMistake={setChangeNoteOnMistake}
         />
       </div>
     );

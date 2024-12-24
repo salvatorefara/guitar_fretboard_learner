@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 
 interface SettingsProps {
@@ -9,6 +10,8 @@ interface SettingsProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
   showNoteName: boolean;
   setShowNoteName: Dispatch<SetStateAction<boolean>>;
+  changeNoteOnMistake: boolean;
+  setChangeNoteOnMistake: Dispatch<SetStateAction<boolean>>;
 }
 
 const style = {
@@ -27,6 +30,8 @@ export default function Settings({
   setOpen,
   showNoteName,
   setShowNoteName,
+  changeNoteOnMistake,
+  setChangeNoteOnMistake,
 }: SettingsProps) {
   const handleClose = () => setOpen(false);
 
@@ -39,6 +44,7 @@ export default function Settings({
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
+          <Typography variant="h5">Settings</Typography>
           <FormControlLabel
             label="Show note name"
             control={
@@ -46,6 +52,18 @@ export default function Settings({
                 checked={showNoteName}
                 onChange={() => {
                   setShowNoteName(!showNoteName);
+                }}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+            }
+          />
+          <FormControlLabel
+            label="Change note on mistake"
+            control={
+              <Switch
+                checked={changeNoteOnMistake}
+                onChange={() => {
+                  setChangeNoteOnMistake(!changeNoteOnMistake);
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
