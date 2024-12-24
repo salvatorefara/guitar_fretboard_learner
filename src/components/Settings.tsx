@@ -14,6 +14,10 @@ interface SettingsProps {
   setShowNoteName: Dispatch<SetStateAction<boolean>>;
   changeNoteOnMistake: boolean;
   setChangeNoteOnMistake: Dispatch<SetStateAction<boolean>>;
+  minNoteIndex: number;
+  setMinNoteIndex: Dispatch<SetStateAction<number>>;
+  maxNoteIndex: number;
+  setMaxNoteIndex: Dispatch<SetStateAction<number>>;
 }
 
 const style = {
@@ -34,12 +38,18 @@ export default function Settings({
   setShowNoteName,
   changeNoteOnMistake,
   setChangeNoteOnMistake,
+  minNoteIndex,
+  setMinNoteIndex,
+  maxNoteIndex,
+  setMaxNoteIndex,
 }: SettingsProps) {
   const handleClose = () => setOpen(false);
 
   const getNoteName = (index: number) => {
     return `${Notes[index].name}${Notes[index].octave}`;
   };
+
+  const value = [minNoteIndex, maxNoteIndex];
 
   return (
     <div>
@@ -83,7 +93,7 @@ export default function Settings({
             step={1}
             marks
             valueLabelDisplay="on"
-            // value={value}
+            value={value}
             // onChange={handleChange}
             // valueLabelDisplay="auto"
             getAriaValueText={getNoteName}
