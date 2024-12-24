@@ -1,11 +1,14 @@
 import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import Modal from "@mui/material/Modal";
 
 interface SettingsProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  showNoteName: boolean;
+  setShowNoteName: Dispatch<SetStateAction<boolean>>;
 }
 
 const style = {
@@ -19,7 +22,12 @@ const style = {
   p: 4,
 };
 
-export default function Settings({ open, setOpen }: SettingsProps) {
+export default function Settings({
+  open,
+  setOpen,
+  showNoteName,
+  setShowNoteName,
+}: SettingsProps) {
   const handleClose = () => setOpen(false);
 
   return (
@@ -31,12 +39,18 @@ export default function Settings({ open, setOpen }: SettingsProps) {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Text in a modal
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
+          <FormControlLabel
+            label="Show note name"
+            control={
+              <Switch
+                checked={showNoteName}
+                onChange={() => {
+                  setShowNoteName(!showNoteName);
+                }}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+            }
+          />
         </Box>
       </Modal>
     </div>

@@ -19,6 +19,7 @@ import "./styles/App.css";
 
 const App = () => {
   const [settingsOpen, setSettingsOpen] = useState(true);
+  const [showNoteName, setShowNoteName] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
@@ -199,13 +200,18 @@ const App = () => {
           />
         </div>
         <Typography variant="h2">
-          {practiceState != "Idle" ? currentNote?.name : ""}
+          {practiceState == "Idle" || !showNoteName ? "" : currentNote?.name}
         </Typography>
         <Score correct={correct} incorrect={incorrect} />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
         </Button>
-        <Settings open={settingsOpen} setOpen={setSettingsOpen} />
+        <Settings
+          open={settingsOpen}
+          setOpen={setSettingsOpen}
+          showNoteName={showNoteName}
+          setShowNoteName={setShowNoteName}
+        />
       </div>
     );
   }
