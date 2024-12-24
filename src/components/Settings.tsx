@@ -1,9 +1,11 @@
 import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Slider from "@mui/material/Slider";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
+import { Notes } from "../constants";
 
 interface SettingsProps {
   open: boolean;
@@ -34,6 +36,10 @@ export default function Settings({
   setChangeNoteOnMistake,
 }: SettingsProps) {
   const handleClose = () => setOpen(false);
+
+  const getNoteName = (index: number) => {
+    return `${Notes[index].name}${Notes[index].octave}`;
+  };
 
   return (
     <div>
@@ -68,6 +74,20 @@ export default function Settings({
                 inputProps={{ "aria-label": "controlled" }}
               />
             }
+          />
+          <Typography> Note range</Typography>
+          <Slider
+            getAriaLabel={getNoteName}
+            min={0}
+            max={Notes.length - 1}
+            step={1}
+            marks
+            valueLabelDisplay="on"
+            // value={value}
+            // onChange={handleChange}
+            // valueLabelDisplay="auto"
+            getAriaValueText={getNoteName}
+            valueLabelFormat={getNoteName}
           />
         </Box>
       </Modal>
