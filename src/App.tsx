@@ -5,6 +5,7 @@ import { CircularProgress } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Header from "./components/Header";
 import Score from "./components/Score";
+import Settings from "./components/Settings";
 import { calculateRMS, getNote, noteToImage } from "./utils";
 import {
   AudioBufferSize,
@@ -17,6 +18,7 @@ import { Note, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [settingsOpen, setSettingsOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
@@ -181,14 +183,14 @@ const App = () => {
   if (isLoading) {
     return (
       <div className="app">
-        <Header />
+        <Header setSettingsOpen={setSettingsOpen} />
         <CircularProgress color="inherit" />
       </div>
     );
   } else {
     return (
       <div className="app">
-        <Header />
+        <Header setSettingsOpen={setSettingsOpen} />
         <div>
           <img
             src={imagePath}
@@ -203,6 +205,7 @@ const App = () => {
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
         </Button>
+        <Settings open={settingsOpen} setOpen={setSettingsOpen} />
       </div>
     );
   }
