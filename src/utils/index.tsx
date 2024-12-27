@@ -19,8 +19,11 @@ export function drawNote(noteIndexRange: number[]): Note {
 }
 
 export function noteToImage(note: Note | null): string {
+  const transpose = 1; // Transpose octave for guitar
   return note
-    ? `notes/${note.name.replace("#", "s").toLowerCase()}${note.octave}.svg`
+    ? `notes/${note.name.replace("#", "s").toLowerCase()}${
+        note.octave + transpose
+      }.svg`
     : "notes/the_lick.svg";
 }
 
