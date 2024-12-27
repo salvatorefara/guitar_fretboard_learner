@@ -1,4 +1,4 @@
-import { C0, NoteNames } from "../constants";
+import { C0, NoteNames, Notes } from "../constants";
 import { Note } from "../types";
 
 export function getNote(pitch: number | null): Note | null {
@@ -9,6 +9,13 @@ export function getNote(pitch: number | null): Note | null {
   const octave = Math.floor(semitone / 12);
   const noteName = NoteNames[semitone % 12];
   return { name: noteName, octave: octave };
+}
+
+export function drawNote(noteIndexRange: number[]): Note {
+  const noteIndex = Math.round(
+    noteIndexRange[0] + Math.random() * (noteIndexRange[1] - noteIndexRange[0])
+  );
+  return Notes[noteIndex];
 }
 
 export function noteToImage(note: Note | null): string {

@@ -14,10 +14,8 @@ interface SettingsProps {
   setShowNoteName: Dispatch<SetStateAction<boolean>>;
   changeNoteOnMistake: boolean;
   setChangeNoteOnMistake: Dispatch<SetStateAction<boolean>>;
-  minNoteIndex: number;
-  setMinNoteIndex: Dispatch<SetStateAction<number>>;
-  maxNoteIndex: number;
-  setMaxNoteIndex: Dispatch<SetStateAction<number>>;
+  noteIndexRange: number[];
+  setNoteIndexRange: Dispatch<SetStateAction<number[]>>;
 }
 
 const style = {
@@ -38,10 +36,8 @@ export default function Settings({
   setShowNoteName,
   changeNoteOnMistake,
   setChangeNoteOnMistake,
-  minNoteIndex,
-  setMinNoteIndex,
-  maxNoteIndex,
-  setMaxNoteIndex,
+  noteIndexRange,
+  setNoteIndexRange,
 }: SettingsProps) {
   const handleClose = () => setOpen(false);
 
@@ -49,7 +45,9 @@ export default function Settings({
     return `${Notes[index].name}${Notes[index].octave}`;
   };
 
-  const value = [minNoteIndex, maxNoteIndex];
+  const handleSliderChange = (event: Event, newValue: number | number[]) => {
+    setNoteIndexRange(newValue as number[]);
+  };
 
   return (
     <div>
@@ -93,9 +91,8 @@ export default function Settings({
             step={1}
             marks
             valueLabelDisplay="on"
-            value={value}
-            // onChange={handleChange}
-            // valueLabelDisplay="auto"
+            value={noteIndexRange}
+            onChange={handleSliderChange}
             getAriaValueText={getNoteName}
             valueLabelFormat={getNoteName}
           />

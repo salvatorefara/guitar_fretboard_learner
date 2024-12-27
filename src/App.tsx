@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
-import { calculateRMS, getNote, noteToImage } from "./utils";
+import { calculateRMS, drawNote, getNote, noteToImage } from "./utils";
 import {
   AudioBufferSize,
   minPitchRMS,
@@ -21,6 +21,7 @@ const App = () => {
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [showNoteName, setShowNoteName] = useState(true);
   const [changeNoteOnMistake, setChangeNoteOnMistake] = useState(true);
+  const [noteIndexRange, setNoteIndexRange] = useState([0, Notes.length - 1]);
   const [minNoteIndex, setMinNoteIndex] = useState(0);
   const [maxNoteIndex, setMaxNoteIndex] = useState(Notes.length - 1);
   const [isLoading, setIsLoading] = useState(true);
@@ -160,7 +161,7 @@ const App = () => {
       case "Idle":
         break;
       case "New Note":
-        const randomNote = Notes[Math.floor(Math.random() * Notes.length)];
+        const randomNote = drawNote(noteIndexRange);
         setCurrentNote(randomNote);
         setPracticeState("Listening");
         break;
@@ -221,10 +222,8 @@ const App = () => {
           setShowNoteName={setShowNoteName}
           changeNoteOnMistake={changeNoteOnMistake}
           setChangeNoteOnMistake={setChangeNoteOnMistake}
-          minNoteIndex={minNoteIndex}
-          setMinNoteIndex={setMinNoteIndex}
-          maxNoteIndex={maxNoteIndex}
-          setMaxNoteIndex={setMaxNoteIndex}
+          noteIndexRange={noteIndexRange}
+          setNoteIndexRange={setNoteIndexRange}
         />
       </div>
     );
