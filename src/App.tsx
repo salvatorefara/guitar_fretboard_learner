@@ -22,8 +22,6 @@ const App = () => {
   const [showNoteName, setShowNoteName] = useState(true);
   const [changeNoteOnMistake, setChangeNoteOnMistake] = useState(true);
   const [noteIndexRange, setNoteIndexRange] = useState([0, Notes.length - 1]);
-  const [minNoteIndex, setMinNoteIndex] = useState(0);
-  const [maxNoteIndex, setMaxNoteIndex] = useState(Notes.length - 1);
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);

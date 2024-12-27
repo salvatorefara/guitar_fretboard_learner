@@ -1,7 +1,9 @@
 import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
+import Grid from "@mui/material/Grid2";
 import Slider from "@mui/material/Slider";
+import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
@@ -28,6 +30,37 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+
+const IOSSlider = styled(Slider)(({ theme }) => ({
+  "& .MuiSlider-valueLabel": {
+    fontWeight: "normal",
+    top: -6,
+    backgroundColor: "unset",
+    color: theme.palette.text.primary,
+    "&::before": {
+      display: "none",
+    },
+    "& *": {
+      background: "transparent",
+      color: "#000",
+      ...theme.applyStyles("dark", {
+        color: "#fff",
+      }),
+    },
+  },
+  "& .MuiSlider-track": {
+    border: "none",
+    height: 5,
+  },
+  "& .MuiSlider-rail": {
+    opacity: 0.5,
+    boxShadow: "inset 0px 0px 4px -2px #000",
+    backgroundColor: "#d0d0d0",
+  },
+  ...theme.applyStyles("dark", {
+    color: "#0a84ff",
+  }),
+}));
 
 export default function Settings({
   open,
@@ -83,19 +116,29 @@ export default function Settings({
               />
             }
           />
-          <Typography> Note range</Typography>
-          <Slider
-            getAriaLabel={getNoteName}
-            min={0}
-            max={Notes.length - 1}
-            step={1}
-            marks
-            valueLabelDisplay="on"
-            value={noteIndexRange}
-            onChange={handleSliderChange}
-            getAriaValueText={getNoteName}
-            valueLabelFormat={getNoteName}
-          />
+          <Grid
+            container
+            spacing={3}
+            sx={{ alignItems: "center", top: "20px", position: "relative" }}
+          >
+            <Grid size={9}>
+              <IOSSlider
+                getAriaLabel={getNoteName}
+                min={0}
+                max={Notes.length - 1}
+                step={1}
+                marks
+                valueLabelDisplay="on"
+                value={noteIndexRange}
+                onChange={handleSliderChange}
+                getAriaValueText={getNoteName}
+                valueLabelFormat={getNoteName}
+              />
+            </Grid>
+            <Grid>
+              <Typography> Note range</Typography>
+            </Grid>
+          </Grid>
         </Box>
       </Modal>
     </div>
