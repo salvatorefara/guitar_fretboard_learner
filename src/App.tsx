@@ -6,7 +6,13 @@ import Typography from "@mui/material/Typography";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
-import { calculateRMS, drawNote, getNote, noteToImage } from "./utils";
+import {
+  calculateRMS,
+  drawNote,
+  getLocalStorageItem,
+  getNote,
+  noteToImage,
+} from "./utils";
 import {
   AudioBufferSize,
   minPitchRMS,
@@ -18,10 +24,16 @@ import { Note, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
-  const [settingsOpen, setSettingsOpen] = useState(true);
-  const [showNoteName, setShowNoteName] = useState(true);
-  const [changeNoteOnMistake, setChangeNoteOnMistake] = useState(true);
-  const [noteIndexRange, setNoteIndexRange] = useState([0, Notes.length - 1]);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showNoteName, setShowNoteName] = useState(
+    getLocalStorageItem("showNoteName", true)
+  );
+  const [changeNoteOnMistake, setChangeNoteOnMistake] = useState(
+    getLocalStorageItem("changeNoteOnMistake", true)
+  );
+  const [noteIndexRange, setNoteIndexRange] = useState(
+    getLocalStorageItem("noteIndexRange", [0, Notes.length - 1])
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
@@ -188,11 +200,28 @@ const App = () => {
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
 
+  useEffect(() => {
+    localStorage.setItem("showNoteName", JSON.stringify(showNoteName));
+  }, [showNoteName]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "changeNoteOnMistake",
+      JSON.stringify(changeNoteOnMistake)
+    );
+  }, [changeNoteOnMistake]);
+
+  useEffect(() => {
+    localStorage.setItem("noteIndexRange", JSON.stringify(noteIndexRange));
+  }, [noteIndexRange]);
+
   if (isLoading) {
     return (
       <div className="app">
         <Header setSettingsOpen={setSettingsOpen} />
-        <CircularProgress color="inherit" />
+        <div className="circular-progress">
+          <CircularProgress color="inherit" />
+        </div>
       </div>
     );
   } else {

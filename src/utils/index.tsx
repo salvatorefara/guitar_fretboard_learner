@@ -1,6 +1,11 @@
 import { C0, NoteNames, Notes } from "../constants";
 import { Note } from "../types";
 
+export function getLocalStorageItem<T>(itemName: string, defaultValue: T): T {
+  const itemValue = localStorage.getItem(itemName);
+  return itemValue ? JSON.parse(itemValue) : defaultValue;
+}
+
 export function getNote(pitch: number | null): Note | null {
   if (pitch == null) {
     return null;

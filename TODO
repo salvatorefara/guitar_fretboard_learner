@@ -6,4 +6,3 @@
 - add piano support
 - create logo
 - migrate to AudioWorkletNode
-- add caching
