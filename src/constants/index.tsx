@@ -68,5 +68,5 @@ export const Notes: Note[] = [
 export const SampleRate = 44100;
 export const AudioBufferSize = 4096;
 
-export const minPitchRMS = 0.02;
-export const minPitchRMSDiff = 0.03;
+export const minPitchRMS = 0.01;
+export const minPitchRMSDiff = 0.02;

@@ -5,7 +5,14 @@ import { CircularProgress } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import Header from "./components/Header";
 import Score from "./components/Score";
-import { calculateRMS, getNote, noteToImage } from "./utils";
+import Settings from "./components/Settings";
+import {
+  calculateRMS,
+  drawNote,
+  getLocalStorageItem,
+  getNote,
+  noteToImage,
+} from "./utils";
 import {
   AudioBufferSize,
   minPitchRMS,
@@ -17,6 +24,16 @@ import { Note, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [showNoteName, setShowNoteName] = useState(
+    getLocalStorageItem("showNoteName", true)
+  );
+  const [changeNoteOnMistake, setChangeNoteOnMistake] = useState(
+    getLocalStorageItem("changeNoteOnMistake", true)
+  );
+  const [noteIndexRange, setNoteIndexRange] = useState(
+    getLocalStorageItem("noteIndexRange", [0, Notes.length - 1])
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
@@ -154,7 +171,7 @@ const App = () => {
       case "Idle":
         break;
       case "New Note":
-        const randomNote = Notes[Math.floor(Math.random() * Notes.length)];
+        const randomNote = drawNote(noteIndexRange);
         setCurrentNote(randomNote);
         setPracticeState("Listening");
         break;
@@ -170,25 +187,47 @@ const App = () => {
           currentNote?.octave == detectedNote?.octave
         ) {
           setCorrect((correct) => correct + 1);
+          setPracticeState("New Note");
         } else {
           setIncorrect((incorrect) => incorrect + 1);
+          if (changeNoteOnMistake) {
+            setPracticeState("New Note");
+          } else {
+            setPracticeState("Listening");
+          }
         }
-        setPracticeState("New Note");
         break;
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
 
+  useEffect(() => {
+    localStorage.setItem("showNoteName", JSON.stringify(showNoteName));
+  }, [showNoteName]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "changeNoteOnMistake",
+      JSON.stringify(changeNoteOnMistake)
+    );
+  }, [changeNoteOnMistake]);
+
+  useEffect(() => {
+    localStorage.setItem("noteIndexRange", JSON.stringify(noteIndexRange));
+  }, [noteIndexRange]);
+
   if (isLoading) {
     return (
       <div className="app">
-        <Header />
-        <CircularProgress color="inherit" />
+        <Header setSettingsOpen={setSettingsOpen} />
+        <div className="circular-progress">
+          <CircularProgress color="inherit" />
+        </div>
       </div>
     );
   } else {
     return (
       <div className="app">
-        <Header />
+        <Header setSettingsOpen={setSettingsOpen} />
         <div>
           <img
             src={imagePath}
@@ -197,12 +236,22 @@ const App = () => {
           />
         </div>
         <Typography variant="h2">
-          {practiceState != "Idle" ? currentNote?.name : ""}
+          {practiceState == "Idle" || !showNoteName ? "" : currentNote?.name}
         </Typography>
         <Score correct={correct} incorrect={incorrect} />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
         </Button>
+        <Settings
+          open={settingsOpen}
+          setOpen={setSettingsOpen}
+          showNoteName={showNoteName}
+          setShowNoteName={setShowNoteName}
+          changeNoteOnMistake={changeNoteOnMistake}
+          setChangeNoteOnMistake={setChangeNoteOnMistake}
+          noteIndexRange={noteIndexRange}
+          setNoteIndexRange={setNoteIndexRange}
+        />
       </div>
     );
   }

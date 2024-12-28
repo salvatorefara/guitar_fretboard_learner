@@ -1,5 +1,10 @@
-import { C0, NoteNames } from "../constants";
+import { C0, NoteNames, Notes } from "../constants";
 import { Note } from "../types";
+
+export function getLocalStorageItem<T>(itemName: string, defaultValue: T): T {
+  const itemValue = localStorage.getItem(itemName);
+  return itemValue ? JSON.parse(itemValue) : defaultValue;
+}
 
 export function getNote(pitch: number | null): Note | null {
   if (pitch == null) {
@@ -11,9 +16,19 @@ export function getNote(pitch: number | null): Note | null {
   return { name: noteName, octave: octave };
 }
 
+export function drawNote(noteIndexRange: number[]): Note {
+  const noteIndex = Math.round(
+    noteIndexRange[0] + Math.random() * (noteIndexRange[1] - noteIndexRange[0])
+  );
+  return Notes[noteIndex];
+}
+
 export function noteToImage(note: Note | null): string {
+  const transpose = 1; // Transpose octave for guitar
   return note
-    ? `notes/${note.name.replace("#", "s").toLowerCase()}${note.octave}.svg`
+    ? `notes/${note.name.replace("#", "s").toLowerCase()}${
+        note.octave + transpose
+      }.svg`
     : "notes/the_lick.svg";
 }
 

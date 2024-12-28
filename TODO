@@ -1,11 +1,8 @@
-- add fret/note range selector
 - add count down on start
-- add option to show note name together with image
-- add option to stay on same note or continue to new note after a mistake
-- add background
 - add octave shifting feature
 - add timer
 - add end of practice per note statistics
 - add instrument recognition
 - add piano support
 - create logo
+- migrate to AudioWorkletNode
