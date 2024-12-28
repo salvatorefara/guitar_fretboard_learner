@@ -79,6 +79,7 @@ export default function Settings({
   };
 
   const handleSliderChange = (event: Event, newValue: number | number[]) => {
+    console.log(event);
     setNoteIndexRange(newValue as number[]);
   };
 
