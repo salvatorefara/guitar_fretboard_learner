@@ -92,9 +92,12 @@ export default function Settings({
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography variant="h5">Settings</Typography>
+          <Typography variant="h5" sx={{ color: "black" }}>
+            Settings
+          </Typography>
           <FormControlLabel
             label="Show note name"
+            sx={{ color: "black" }}
             control={
               <Switch
                 checked={showNoteName}
@@ -107,6 +110,7 @@ export default function Settings({
           />
           <FormControlLabel
             label="Change note on mistake"
+            sx={{ color: "black" }}
             control={
               <Switch
                 checked={changeNoteOnMistake}
@@ -137,7 +141,7 @@ export default function Settings({
               />
             </Grid>
             <Grid>
-              <Typography> Note range</Typography>
+              <Typography sx={{ color: "black" }}> Note range</Typography>
             </Grid>
           </Grid>
         </Box>

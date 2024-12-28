@@ -228,14 +228,8 @@ const App = () => {
     return (
       <div className="app">
         <Header setSettingsOpen={setSettingsOpen} />
-        <div>
-          <img
-            src={imagePath}
-            className="note"
-            alt={noteToImage(currentNote)}
-          />
-        </div>
-        <Typography variant="h2">
+        <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
+        <Typography variant="h2" sx={{ color: "black" }}>
           {practiceState == "Idle" || !showNoteName ? "" : currentNote?.name}
         </Typography>
         <Score correct={correct} incorrect={incorrect} />
