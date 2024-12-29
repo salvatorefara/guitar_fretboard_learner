@@ -1,7 +1,7 @@
 .app {
   position: absolute;
   display: grid;
-  grid-template-rows: 70px 200px 100px 150px 100px;
+  grid-template-rows: 70px 200px 100px 100px 150px 100px;
   top: 0;
   left: 0;
   width: 100vw;

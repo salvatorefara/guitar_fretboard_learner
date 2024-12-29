@@ -3,6 +3,7 @@ import * as Pitchfinder from "pitchfinder";
 import Button from "@mui/material/Button";
 import { CircularProgress } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import Clock from "./components/Clock";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
@@ -15,15 +16,30 @@ import {
 } from "./utils";
 import {
   AudioBufferSize,
-  minPitchRMS,
-  minPitchRMSDiff,
+  CountdownTime,
+  MicSensitivityIndex,
+  MinPitchRMS,
   Notes,
   SampleRate,
+  TimerTime,
 } from "./constants";
 import { Note, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [useClock, setUseClock] = useState(
+    getLocalStorageItem("useClock", true)
+  );
+  const [timer, setTimer] = useState(
+    getLocalStorageItem("timerTime", TimerTime)
+  );
+  const [timerTime, setTimerTime] = useState(
+    getLocalStorageItem("timerTime", TimerTime)
+  );
+  const [micSensitivityIndex, setMicSensitivityIndex] = useState(
+    getLocalStorageItem("micSensitivityIndex", MicSensitivityIndex)
+  );
+  const [countdown, setCountdown] = useState(CountdownTime);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showNoteName, setShowNoteName] = useState(
     getLocalStorageItem("showNoteName", true)
@@ -81,7 +97,7 @@ const App = () => {
   }, []);
 
   const imagePath = useMemo(() => {
-    if (practiceState === "Idle") {
+    if (["Idle", "Countdown"].includes(practiceState)) {
       return imageCache.current[noteToImage(null)]?.src || "notes/the_lick.svg";
     } else if (currentNote) {
       return imageCache.current[noteToImage(currentNote)]?.src || "";
@@ -92,7 +108,12 @@ const App = () => {
   const handlePractice = () => {
     if (practiceState == "Idle") {
       startListening();
-      setPracticeState("New Note");
+      if (useClock) {
+        setCountdown(CountdownTime);
+        setPracticeState("Countdown");
+      } else {
+        setPracticeState("New Note");
+      }
       setCorrect(0);
       setIncorrect(0);
     } else {
@@ -120,13 +141,18 @@ const App = () => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const inputRMS = calculateRMS(inputBuffer);
         const detectedPitch =
-          inputRMS > minPitchRMS ? detectPitch(inputBuffer) : null;
+          inputRMS > MinPitchRMS[micSensitivityIndex]
+            ? detectPitch(inputBuffer)
+            : null;
         const pitchRMS = calculateRMS(inputBuffer);
         const note = getNote(detectedPitch);
 
         if (!detectedPitch) {
-          previousPitchRMSRef.current = minPitchRMS;
-        } else if (pitchRMS > minPitchRMSDiff + previousPitchRMSRef.current) {
+          previousPitchRMSRef.current = MinPitchRMS[micSensitivityIndex];
+        } else if (
+          pitchRMS >
+          MinPitchRMS[micSensitivityIndex] + previousPitchRMSRef.current
+        ) {
           console.log("New note!");
           setNewNoteTimestamp(Date.now());
           previousPitchRMSRef.current = pitchRMS;
@@ -201,6 +227,19 @@ const App = () => {
   }, [practiceState, newNoteTimestamp, detectedNote]);
 
   useEffect(() => {
+    if (countdown === 0 && practiceState === "Countdown") {
+      setTimer(timerTime);
+      setPracticeState("New Note");
+    }
+  }, [countdown]);
+
+  useEffect(() => {
+    if (timer === 0) {
+      setPracticeState("Idle");
+    }
+  }, [timer]);
+
+  useEffect(() => {
     localStorage.setItem("showNoteName", JSON.stringify(showNoteName));
   }, [showNoteName]);
 
@@ -214,6 +253,22 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("noteIndexRange", JSON.stringify(noteIndexRange));
   }, [noteIndexRange]);
+
+  useEffect(() => {
+    localStorage.setItem("useClock", JSON.stringify(useClock));
+  }, [useClock]);
+
+  useEffect(() => {
+    localStorage.setItem("timerTime", JSON.stringify(timerTime));
+  }, [timerTime]);
+
+  useEffect(() => {
+    console.log(`MinPitchRMS: ${MinPitchRMS[micSensitivityIndex]}`);
+    localStorage.setItem(
+      "micSensitivityIndex",
+      JSON.stringify(micSensitivityIndex)
+    );
+  }, [micSensitivityIndex]);
 
   if (isLoading) {
     return (
@@ -230,8 +285,18 @@ const App = () => {
         <Header setSettingsOpen={setSettingsOpen} />
         <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
         <Typography variant="h2" sx={{ color: "black" }}>
-          {practiceState == "Idle" || !showNoteName ? "" : currentNote?.name}
+          {["Idle", "Countdown"].includes(practiceState) || !showNoteName
+            ? ""
+            : currentNote?.name}
         </Typography>
+        <Clock
+          practiceState={practiceState}
+          useClock={useClock}
+          timer={timer}
+          setTimer={setTimer}
+          countdown={countdown}
+          setCountdown={setCountdown}
+        />
         <Score correct={correct} incorrect={incorrect} />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
@@ -243,8 +308,14 @@ const App = () => {
           setShowNoteName={setShowNoteName}
           changeNoteOnMistake={changeNoteOnMistake}
           setChangeNoteOnMistake={setChangeNoteOnMistake}
+          useClock={useClock}
+          setUseClock={setUseClock}
           noteIndexRange={noteIndexRange}
           setNoteIndexRange={setNoteIndexRange}
+          timerTime={timerTime}
+          setTimerTime={setTimerTime}
+          micSensitivityIndex={micSensitivityIndex}
+          setMicSensitivityIndex={setMicSensitivityIndex}
         />
       </div>
     );

@@ -68,5 +68,32 @@ export const Notes: Note[] = [
 export const SampleRate = 44100;
 export const AudioBufferSize = 4096;
 
-export const minPitchRMS = 0.01;
-export const minPitchRMSDiff = 0.02;
+export const MicSensitivityIndex = 4;
+export const MinPitchRMS = [
+  0.04, 0.035, 0.03, 0.025, 0.02, 0.015, 0.01, 0.005, 0,
+];
+
+export const CountdownTime = 3;
+export const TimerTime = 180;
+export const TimerTimes = [
+  {
+    value: 60,
+    label: "1 minute",
+  },
+  {
+    value: 120,
+    label: "2 minutes",
+  },
+  {
+    value: 180,
+    label: "3 minutes",
+  },
+  {
+    value: 240,
+    label: "4 minutes",
+  },
+  {
+    value: 300,
+    label: "5 minutes",
+  },
+];
