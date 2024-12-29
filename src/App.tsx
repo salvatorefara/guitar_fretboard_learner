@@ -30,7 +30,12 @@ const App = () => {
   const [useClock, setUseClock] = useState(
     getLocalStorageItem("useClock", true)
   );
-  const [timer, setTimer] = useState(TimerTime);
+  const [timer, setTimer] = useState(
+    getLocalStorageItem("timerTime", TimerTime)
+  );
+  const [timerTime, setTimerTime] = useState(
+    getLocalStorageItem("timerTime", TimerTime)
+  );
   const [countdown, setCountdown] = useState(CountdownTime);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showNoteName, setShowNoteName] = useState(
@@ -215,7 +220,7 @@ const App = () => {
 
   useEffect(() => {
     if (countdown === 0 && practiceState === "Countdown") {
-      setTimer(TimerTime);
+      setTimer(timerTime);
       setPracticeState("New Note");
     }
   }, [countdown]);
@@ -244,6 +249,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("useClock", JSON.stringify(useClock));
   }, [useClock]);
+
+  useEffect(() => {
+    localStorage.setItem("timerTime", JSON.stringify(timerTime));
+  }, [timerTime]);
 
   if (isLoading) {
     return (
@@ -287,6 +296,8 @@ const App = () => {
           setUseClock={setUseClock}
           noteIndexRange={noteIndexRange}
           setNoteIndexRange={setNoteIndexRange}
+          timerTime={timerTime}
+          setTimerTime={setTimerTime}
         />
       </div>
     );

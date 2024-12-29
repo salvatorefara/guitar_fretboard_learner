@@ -73,3 +73,25 @@ export const MinPitchRMSDiff = 0.02;
 
 export const CountdownTime = 3;
 export const TimerTime = 180;
+export const TimerTimes = [
+  {
+    value: 60,
+    label: "1 minute",
+  },
+  {
+    value: 120,
+    label: "2 minutes",
+  },
+  {
+    value: 180,
+    label: "3 minutes",
+  },
+  {
+    value: 240,
+    label: "4 minutes",
+  },
+  {
+    value: 300,
+    label: "5 minutes",
+  },
+];

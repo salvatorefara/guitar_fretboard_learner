@@ -2,12 +2,13 @@ import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid2";
+import TextField from "@mui/material/TextField";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { Notes } from "../constants";
+import { Notes, TimerTimes } from "../constants";
 
 interface SettingsProps {
   open: boolean;
@@ -20,6 +21,8 @@ interface SettingsProps {
   setUseClock: Dispatch<SetStateAction<boolean>>;
   noteIndexRange: number[];
   setNoteIndexRange: Dispatch<SetStateAction<number[]>>;
+  timerTime: number;
+  setTimerTime: Dispatch<SetStateAction<number>>;
 }
 
 const style = {
@@ -75,6 +78,8 @@ export default function Settings({
   setUseClock,
   noteIndexRange,
   setNoteIndexRange,
+  timerTime,
+  setTimerTime,
 }: SettingsProps) {
   const handleClose = () => setOpen(false);
 
@@ -125,19 +130,46 @@ export default function Settings({
               />
             }
           />
-          <FormControlLabel
-            label="Use clock"
-            sx={{ color: "black" }}
-            control={
-              <Switch
-                checked={useClock}
-                onChange={() => {
-                  setUseClock(!useClock);
-                }}
-                inputProps={{ "aria-label": "controlled" }}
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid>
+              <FormControlLabel
+                label="Use timer"
+                sx={{ color: "black" }}
+                control={
+                  <Switch
+                    checked={useClock}
+                    onChange={() => {
+                      setUseClock(!useClock);
+                    }}
+                    inputProps={{ "aria-label": "controlled" }}
+                  />
+                }
               />
-            }
-          />
+            </Grid>
+            <Grid>
+              <TextField
+                id="standard-select-currency-native"
+                select
+                value={timerTime}
+                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                  setTimerTime(Number(event.target.value));
+                }}
+                defaultValue="EUR"
+                slotProps={{
+                  select: {
+                    native: true,
+                  },
+                }}
+                variant="standard"
+              >
+                {TimerTimes.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+          </Grid>
           <Grid
             container
             spacing={3}

@@ -1,4 +1,5 @@
 - reduce chance of same note appearing consecutively
+- add microphone threshold parameter in settings
 - add octave shifting feature
 - add end of practice per note statistics
 - add instrument recognition
