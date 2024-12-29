@@ -275,7 +275,7 @@ const App = () => {
       <div className="app">
         <Header setSettingsOpen={setSettingsOpen} />
         <div className="circular-progress">
-          <CircularProgress color="inherit" />
+          <CircularProgress sx={{ color: "black" }} />
         </div>
       </div>
     );

@@ -22,7 +22,9 @@ export default function Countdown({ time, setTime }: CountdownProps) {
 
   return (
     <div className="countdown">
-      <Typography variant="h2">{time}</Typography>
+      <Typography variant="h2" sx={{ color: "black" }}>
+        {time}
+      </Typography>
     </div>
   );
 }

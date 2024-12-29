@@ -21,7 +21,7 @@ export default function Timer({ time, setTime }: TimerProps) {
   }, []);
 
   return (
-    <Typography variant="h2">
+    <Typography variant="h2" sx={{ color: "black" }}>
       {`${Math.floor(time / 60)}`.padStart(2, "0")}:
       {`${time % 60}`.padStart(2, "0")}
     </Typography>
