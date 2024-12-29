@@ -5,6 +5,7 @@ interface CountdownProps {
   time: number;
   setTime: Dispatch<SetStateAction<number>>;
 }
+
 export default function Countdown({ time, setTime }: CountdownProps) {
   useEffect(() => {
     const timer = setInterval(() => {

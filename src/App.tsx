@@ -3,7 +3,7 @@ import * as Pitchfinder from "pitchfinder";
 import Button from "@mui/material/Button";
 import { CircularProgress } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import Countdown from "./components/Countdown";
+import Timer from "./components/Timer";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
@@ -21,11 +21,13 @@ import {
   MinPitchRMSDiff,
   Notes,
   SampleRate,
+  TimerTime,
 } from "./constants";
 import { Note, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [timer, setTimer] = useState(TimerTime);
   const [countdown, setCountdown] = useState(CountdownTime);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showNoteName, setShowNoteName] = useState(
@@ -244,11 +246,13 @@ const App = () => {
             ? ""
             : currentNote?.name}
         </Typography>
-        {practiceState == "Countdown" ? (
-          <Countdown time={countdown} setTime={setCountdown} />
-        ) : (
-          <div></div>
-        )}
+        <Timer
+          practiceState={practiceState}
+          time={timer}
+          setTime={setTimer}
+          countdown={countdown}
+          setCountdown={setCountdown}
+        />
         <Score correct={correct} incorrect={incorrect} />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}

@@ -72,3 +72,4 @@ export const MinPitchRMS = 0.01;
 export const MinPitchRMSDiff = 0.02;
 
 export const CountdownTime = 3;
+export const TimerTime = 180;
