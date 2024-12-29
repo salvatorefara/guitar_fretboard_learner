@@ -3,6 +3,7 @@ import * as Pitchfinder from "pitchfinder";
 import Button from "@mui/material/Button";
 import { CircularProgress } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import Countdown from "./components/Countdown";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
@@ -15,8 +16,9 @@ import {
 } from "./utils";
 import {
   AudioBufferSize,
-  minPitchRMS,
-  minPitchRMSDiff,
+  CountdownTime,
+  MinPitchRMS,
+  MinPitchRMSDiff,
   Notes,
   SampleRate,
 } from "./constants";
@@ -24,6 +26,7 @@ import { Note, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [countdown, setCountdown] = useState(CountdownTime);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showNoteName, setShowNoteName] = useState(
     getLocalStorageItem("showNoteName", true)
@@ -81,7 +84,7 @@ const App = () => {
   }, []);
 
   const imagePath = useMemo(() => {
-    if (practiceState === "Idle") {
+    if (["Idle", "Countdown"].includes(practiceState)) {
       return imageCache.current[noteToImage(null)]?.src || "notes/the_lick.svg";
     } else if (currentNote) {
       return imageCache.current[noteToImage(currentNote)]?.src || "";
@@ -92,7 +95,8 @@ const App = () => {
   const handlePractice = () => {
     if (practiceState == "Idle") {
       startListening();
-      setPracticeState("New Note");
+      setCountdown(CountdownTime);
+      setPracticeState("Countdown");
       setCorrect(0);
       setIncorrect(0);
     } else {
@@ -120,13 +124,13 @@ const App = () => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const inputRMS = calculateRMS(inputBuffer);
         const detectedPitch =
-          inputRMS > minPitchRMS ? detectPitch(inputBuffer) : null;
+          inputRMS > MinPitchRMS ? detectPitch(inputBuffer) : null;
         const pitchRMS = calculateRMS(inputBuffer);
         const note = getNote(detectedPitch);
 
         if (!detectedPitch) {
-          previousPitchRMSRef.current = minPitchRMS;
-        } else if (pitchRMS > minPitchRMSDiff + previousPitchRMSRef.current) {
+          previousPitchRMSRef.current = MinPitchRMS;
+        } else if (pitchRMS > MinPitchRMSDiff + previousPitchRMSRef.current) {
           console.log("New note!");
           setNewNoteTimestamp(Date.now());
           previousPitchRMSRef.current = pitchRMS;
@@ -201,6 +205,12 @@ const App = () => {
   }, [practiceState, newNoteTimestamp, detectedNote]);
 
   useEffect(() => {
+    if (countdown === 0) {
+      setPracticeState("New Note");
+    }
+  }, [countdown]);
+
+  useEffect(() => {
     localStorage.setItem("showNoteName", JSON.stringify(showNoteName));
   }, [showNoteName]);
 
@@ -230,8 +240,15 @@ const App = () => {
         <Header setSettingsOpen={setSettingsOpen} />
         <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
         <Typography variant="h2" sx={{ color: "black" }}>
-          {practiceState == "Idle" || !showNoteName ? "" : currentNote?.name}
+          {["Idle", "Countdown"].includes(practiceState) || !showNoteName
+            ? ""
+            : currentNote?.name}
         </Typography>
+        {practiceState == "Countdown" ? (
+          <Countdown time={countdown} setTime={setCountdown} />
+        ) : (
+          <div></div>
+        )}
         <Score correct={correct} incorrect={incorrect} />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
