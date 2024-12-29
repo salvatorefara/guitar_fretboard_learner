@@ -3,7 +3,7 @@ import * as Pitchfinder from "pitchfinder";
 import Button from "@mui/material/Button";
 import { CircularProgress } from "@mui/material";
 import Typography from "@mui/material/Typography";
-import Timer from "./components/Timer";
+import Clock from "./components/Clock";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
@@ -207,10 +207,17 @@ const App = () => {
   }, [practiceState, newNoteTimestamp, detectedNote]);
 
   useEffect(() => {
-    if (countdown === 0) {
+    if (countdown === 0 && practiceState === "Countdown") {
+      setTimer(TimerTime);
       setPracticeState("New Note");
     }
   }, [countdown]);
+
+  useEffect(() => {
+    if (timer === 0) {
+      setPracticeState("Idle");
+    }
+  }, [timer]);
 
   useEffect(() => {
     localStorage.setItem("showNoteName", JSON.stringify(showNoteName));
@@ -246,10 +253,10 @@ const App = () => {
             ? ""
             : currentNote?.name}
         </Typography>
-        <Timer
+        <Clock
           practiceState={practiceState}
-          time={timer}
-          setTime={setTimer}
+          timer={timer}
+          setTimer={setTimer}
           countdown={countdown}
           setCountdown={setCountdown}
         />

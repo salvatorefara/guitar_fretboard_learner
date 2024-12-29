@@ -1,6 +1,5 @@
-- add count down on start
+- reduce chance of same note appearing consecutively
 - add octave shifting feature
-- add timer
 - add end of practice per note statistics
 - add instrument recognition
 - add piano support
