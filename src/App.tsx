@@ -7,6 +7,7 @@ import Clock from "./components/Clock";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
+import Statistics from "./components/Statistics";
 import {
   calculateRMS,
   drawNote,
@@ -317,6 +318,7 @@ const App = () => {
           micSensitivityIndex={micSensitivityIndex}
           setMicSensitivityIndex={setMicSensitivityIndex}
         />
+        <Statistics />
       </div>
     );
   }
