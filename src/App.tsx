@@ -17,8 +17,8 @@ import {
 import {
   AudioBufferSize,
   CountdownTime,
+  MicSensitivityIndex,
   MinPitchRMS,
-  MinPitchRMSDiff,
   Notes,
   SampleRate,
   TimerTime,
@@ -35,6 +35,9 @@ const App = () => {
   );
   const [timerTime, setTimerTime] = useState(
     getLocalStorageItem("timerTime", TimerTime)
+  );
+  const [micSensitivityIndex, setMicSensitivityIndex] = useState(
+    getLocalStorageItem("micSensitivityIndex", MicSensitivityIndex)
   );
   const [countdown, setCountdown] = useState(CountdownTime);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -138,13 +141,18 @@ const App = () => {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         const inputRMS = calculateRMS(inputBuffer);
         const detectedPitch =
-          inputRMS > MinPitchRMS ? detectPitch(inputBuffer) : null;
+          inputRMS > MinPitchRMS[micSensitivityIndex]
+            ? detectPitch(inputBuffer)
+            : null;
         const pitchRMS = calculateRMS(inputBuffer);
         const note = getNote(detectedPitch);
 
         if (!detectedPitch) {
-          previousPitchRMSRef.current = MinPitchRMS;
-        } else if (pitchRMS > MinPitchRMSDiff + previousPitchRMSRef.current) {
+          previousPitchRMSRef.current = MinPitchRMS[micSensitivityIndex];
+        } else if (
+          pitchRMS >
+          MinPitchRMS[micSensitivityIndex] + previousPitchRMSRef.current
+        ) {
           console.log("New note!");
           setNewNoteTimestamp(Date.now());
           previousPitchRMSRef.current = pitchRMS;
@@ -254,6 +262,14 @@ const App = () => {
     localStorage.setItem("timerTime", JSON.stringify(timerTime));
   }, [timerTime]);
 
+  useEffect(() => {
+    console.log(`MinPitchRMS: ${MinPitchRMS[micSensitivityIndex]}`);
+    localStorage.setItem(
+      "micSensitivityIndex",
+      JSON.stringify(micSensitivityIndex)
+    );
+  }, [micSensitivityIndex]);
+
   if (isLoading) {
     return (
       <div className="app">
@@ -298,6 +314,8 @@ const App = () => {
           setNoteIndexRange={setNoteIndexRange}
           timerTime={timerTime}
           setTimerTime={setTimerTime}
+          micSensitivityIndex={micSensitivityIndex}
+          setMicSensitivityIndex={setMicSensitivityIndex}
         />
       </div>
     );

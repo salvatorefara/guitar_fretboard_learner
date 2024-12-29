@@ -8,7 +8,7 @@ import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { Notes, TimerTimes } from "../constants";
+import { MinPitchRMS, Notes, TimerTimes } from "../constants";
 
 interface SettingsProps {
   open: boolean;
@@ -23,6 +23,8 @@ interface SettingsProps {
   setNoteIndexRange: Dispatch<SetStateAction<number[]>>;
   timerTime: number;
   setTimerTime: Dispatch<SetStateAction<number>>;
+  micSensitivityIndex: number;
+  setMicSensitivityIndex: Dispatch<SetStateAction<number>>;
 }
 
 const style = {
@@ -80,6 +82,8 @@ export default function Settings({
   setNoteIndexRange,
   timerTime,
   setTimerTime,
+  micSensitivityIndex,
+  setMicSensitivityIndex,
 }: SettingsProps) {
   const handleClose = () => setOpen(false);
 
@@ -87,9 +91,16 @@ export default function Settings({
     return `${Notes[index].name}${Notes[index].octave}`;
   };
 
-  const handleSliderChange = (event: Event, newValue: number | number[]) => {
-    console.log(event);
-    setNoteIndexRange(newValue as number[]);
+  const handleNoteRangeChange = (event: any) => {
+    if (event.target) {
+      setNoteIndexRange(event.target.value as number[]);
+    }
+  };
+
+  const handleMicSensitivityChange = (event: any) => {
+    if (event.target) {
+      setMicSensitivityIndex(event.target.value as number);
+    }
   };
 
   return (
@@ -151,7 +162,7 @@ export default function Settings({
                 id="standard-select-currency-native"
                 select
                 value={timerTime}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                onChange={(event) => {
                   setTimerTime(Number(event.target.value));
                 }}
                 defaultValue="EUR"
@@ -175,22 +186,43 @@ export default function Settings({
             spacing={3}
             sx={{ alignItems: "center", top: "20px", position: "relative" }}
           >
-            <Grid size={8}>
+            <Grid size={6}>
               <IOSSlider
                 getAriaLabel={getNoteName}
                 min={0}
                 max={Notes.length - 1}
                 step={1}
-                marks
                 valueLabelDisplay="on"
                 value={noteIndexRange}
-                onChange={handleSliderChange}
+                onChange={handleNoteRangeChange}
                 getAriaValueText={getNoteName}
                 valueLabelFormat={getNoteName}
               />
             </Grid>
             <Grid>
-              <Typography sx={{ color: "black" }}> Note range</Typography>
+              <Typography sx={{ color: "black" }}>Note range</Typography>
+            </Grid>
+          </Grid>
+          <Grid
+            container
+            spacing={3}
+            sx={{ alignItems: "center", top: "20px", position: "relative" }}
+          >
+            <Grid size={6}>
+              <IOSSlider
+                getAriaLabel={getNoteName}
+                min={0}
+                max={MinPitchRMS.length - 1}
+                step={1}
+                valueLabelDisplay="off"
+                value={micSensitivityIndex}
+                onChange={handleMicSensitivityChange}
+              />
+            </Grid>
+            <Grid>
+              <Typography sx={{ color: "black" }}>
+                Microphone sensitivity
+              </Typography>
             </Grid>
           </Grid>
         </Box>
