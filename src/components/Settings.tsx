@@ -16,6 +16,8 @@ interface SettingsProps {
   setShowNoteName: Dispatch<SetStateAction<boolean>>;
   changeNoteOnMistake: boolean;
   setChangeNoteOnMistake: Dispatch<SetStateAction<boolean>>;
+  useClock: boolean;
+  setUseClock: Dispatch<SetStateAction<boolean>>;
   noteIndexRange: number[];
   setNoteIndexRange: Dispatch<SetStateAction<number[]>>;
 }
@@ -25,7 +27,7 @@ const style = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: 350,
   bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
@@ -69,6 +71,8 @@ export default function Settings({
   setShowNoteName,
   changeNoteOnMistake,
   setChangeNoteOnMistake,
+  useClock,
+  setUseClock,
   noteIndexRange,
   setNoteIndexRange,
 }: SettingsProps) {
@@ -121,12 +125,25 @@ export default function Settings({
               />
             }
           />
+          <FormControlLabel
+            label="Use clock"
+            sx={{ color: "black" }}
+            control={
+              <Switch
+                checked={useClock}
+                onChange={() => {
+                  setUseClock(!useClock);
+                }}
+                inputProps={{ "aria-label": "controlled" }}
+              />
+            }
+          />
           <Grid
             container
             spacing={3}
             sx={{ alignItems: "center", top: "20px", position: "relative" }}
           >
-            <Grid size={9}>
+            <Grid size={8}>
               <IOSSlider
                 getAriaLabel={getNoteName}
                 min={0}

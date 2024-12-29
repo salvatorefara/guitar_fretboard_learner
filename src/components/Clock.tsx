@@ -4,6 +4,7 @@ import Timer from "./Timer";
 
 interface ClockProps {
   practiceState: string;
+  useClock: boolean;
   timer: number;
   setTimer: Dispatch<SetStateAction<number>>;
   countdown: number;
@@ -12,17 +13,17 @@ interface ClockProps {
 
 export default function Clock({
   practiceState,
+  useClock,
   timer,
   setTimer,
   countdown,
   setCountdown,
 }: ClockProps) {
-  switch (practiceState) {
-    case "Idle":
-      return <div></div>;
-    case "Countdown":
-      return <Countdown time={countdown} setTime={setCountdown} />;
-    default:
-      return <Timer time={timer} setTime={setTimer} />;
+  if (practiceState === "Idle" || !useClock) {
+    return <div></div>;
+  } else if (practiceState === "Countdown") {
+    return <Countdown time={countdown} setTime={setCountdown} />;
+  } else {
+    return <Timer time={timer} setTime={setTimer} />;
   }
 }

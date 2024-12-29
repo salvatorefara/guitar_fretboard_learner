@@ -27,6 +27,9 @@ import { Note, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [useClock, setUseClock] = useState(
+    getLocalStorageItem("useClock", true)
+  );
   const [timer, setTimer] = useState(TimerTime);
   const [countdown, setCountdown] = useState(CountdownTime);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -97,8 +100,12 @@ const App = () => {
   const handlePractice = () => {
     if (practiceState == "Idle") {
       startListening();
-      setCountdown(CountdownTime);
-      setPracticeState("Countdown");
+      if (useClock) {
+        setCountdown(CountdownTime);
+        setPracticeState("Countdown");
+      } else {
+        setPracticeState("New Note");
+      }
       setCorrect(0);
       setIncorrect(0);
     } else {
@@ -234,6 +241,10 @@ const App = () => {
     localStorage.setItem("noteIndexRange", JSON.stringify(noteIndexRange));
   }, [noteIndexRange]);
 
+  useEffect(() => {
+    localStorage.setItem("useClock", JSON.stringify(useClock));
+  }, [useClock]);
+
   if (isLoading) {
     return (
       <div className="app">
@@ -255,6 +266,7 @@ const App = () => {
         </Typography>
         <Clock
           practiceState={practiceState}
+          useClock={useClock}
           timer={timer}
           setTimer={setTimer}
           countdown={countdown}
@@ -271,6 +283,8 @@ const App = () => {
           setShowNoteName={setShowNoteName}
           changeNoteOnMistake={changeNoteOnMistake}
           setChangeNoteOnMistake={setChangeNoteOnMistake}
+          useClock={useClock}
+          setUseClock={setUseClock}
           noteIndexRange={noteIndexRange}
           setNoteIndexRange={setNoteIndexRange}
         />
