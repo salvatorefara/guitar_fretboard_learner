@@ -97,3 +97,16 @@ export const TimerTimes = [
     label: "5 minutes",
   },
 ];
+
+export const NoteStatsColorMap = [
+  "#8e0152",
+  "#c51b7d",
+  "#de77ae",
+  "#f1b6da",
+  "#fde0ef",
+  "#e6f5d0",
+  "#b8e186",
+  "#7fbc41",
+  "#4d9221",
+  "#276419",
+];

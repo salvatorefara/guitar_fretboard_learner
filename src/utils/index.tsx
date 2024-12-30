@@ -1,4 +1,4 @@
-import { C0, NoteNames, Notes } from "../constants";
+import { C0, NoteNames, Notes, NoteStatsColorMap } from "../constants";
 import { Note } from "../types";
 
 export function getLocalStorageItem<T>(itemName: string, defaultValue: T): T {
@@ -39,3 +39,15 @@ export const calculateRMS = (buffer: Float32Array): number => {
   }
   return Math.sqrt(sum / buffer.length);
 };
+
+export function getColor(value: number | null): string {
+  if (value === null) {
+    return "#000000";
+  }
+  if (value < 0 || value > 1) {
+    throw new Error("Value must be between 0 and 1");
+  }
+
+  const index = Math.floor(value * (NoteStatsColorMap.length - 1));
+  return NoteStatsColorMap[index];
+}
