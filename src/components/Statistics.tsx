@@ -1,5 +1,7 @@
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
+import Typography from "@mui/material/Typography";
+import Legend from "./Legend";
 import NoteStats from "./NoteStats";
 
 const style = {
@@ -12,6 +14,9 @@ const style = {
   bgcolor: "background.paper",
   overflow: "auto",
   boxShadow: 24,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
   p: 4,
 };
 
@@ -25,7 +30,11 @@ export default function Statistics() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
+          <Typography variant="h5" sx={{ color: "black" }}>
+            Statistics
+          </Typography>
           <NoteStats />
+          <Legend />
         </Box>
       </Modal>
     </div>
