@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
-import NoteStats from "../assets/note_stats.svg?react";
+import NoteStats from "./NoteStats";
+// import NoteStats from "../assets/note_stats.svg?react";
 
 const style = {
   position: "absolute",
