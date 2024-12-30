@@ -1,15 +1,16 @@
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import NoteStats from "./NoteStats";
-// import NoteStats from "../assets/note_stats.svg?react";
 
 const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 380,
+  width: 850,
+  maxWidth: "100%",
   bgcolor: "background.paper",
+  overflow: "auto",
   boxShadow: 24,
   p: 4,
 };
