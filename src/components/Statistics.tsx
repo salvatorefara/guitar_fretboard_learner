@@ -1,8 +1,14 @@
+import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import Legend from "./Legend";
 import NoteStats from "./NoteStats";
+
+interface StatisticsProps {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}
 
 const style = {
   position: "absolute",
@@ -20,12 +26,13 @@ const style = {
   p: 4,
 };
 
-export default function Statistics() {
+export default function Statistics({ open, setOpen }: StatisticsProps) {
+  const handleClose = () => setOpen(false);
   return (
     <div>
       <Modal
-        open={true}
-        // onClose={handleClose}
+        open={open}
+        onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >

@@ -42,6 +42,7 @@ const App = () => {
   );
   const [countdown, setCountdown] = useState(CountdownTime);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [showNoteName, setShowNoteName] = useState(
     getLocalStorageItem("showNoteName", true)
   );
@@ -274,7 +275,10 @@ const App = () => {
   if (isLoading) {
     return (
       <div className="app">
-        <Header setSettingsOpen={setSettingsOpen} />
+        <Header
+          setSettingsOpen={setSettingsOpen}
+          setStatisticsOpen={setStatisticsOpen}
+        />
         <div className="circular-progress">
           <CircularProgress sx={{ color: "black" }} />
         </div>
@@ -283,7 +287,10 @@ const App = () => {
   } else {
     return (
       <div className="app">
-        <Header setSettingsOpen={setSettingsOpen} />
+        <Header
+          setSettingsOpen={setSettingsOpen}
+          setStatisticsOpen={setStatisticsOpen}
+        />
         <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
         <Typography variant="h2" sx={{ color: "black" }}>
           {["Idle", "Countdown"].includes(practiceState) || !showNoteName
@@ -318,7 +325,7 @@ const App = () => {
           micSensitivityIndex={micSensitivityIndex}
           setMicSensitivityIndex={setMicSensitivityIndex}
         />
-        <Statistics />
+        <Statistics open={statisticsOpen} setOpen={setStatisticsOpen} />
       </div>
     );
   }

@@ -5,12 +5,17 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
+import QueryStatsIcon from "@mui/icons-material/QueryStats";
 
 interface HeaderProps {
   setSettingsOpen: Dispatch<SetStateAction<boolean>>;
+  setStatisticsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function Header({ setSettingsOpen }: HeaderProps) {
+export default function Header({
+  setSettingsOpen,
+  setStatisticsOpen,
+}: HeaderProps) {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -26,6 +31,18 @@ export default function Header({ setSettingsOpen }: HeaderProps) {
             sx={{ mr: 2 }}
           >
             <MenuIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => {
+              setStatisticsOpen(true);
+            }}
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+          >
+            <QueryStatsIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Guitar Fretboard Learner
