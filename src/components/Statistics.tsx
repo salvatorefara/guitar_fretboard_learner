@@ -17,12 +17,10 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 850,
   maxWidth: "100%",
+  maxHeight: "100%",
   bgcolor: "background.paper",
   overflow: "auto",
   boxShadow: 24,
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
   p: 4,
 };
 
