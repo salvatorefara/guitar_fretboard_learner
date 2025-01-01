@@ -23,13 +23,15 @@ export function drawNote(noteIndexRange: number[]): Note {
   return Notes[noteIndex];
 }
 
-export function noteToImage(note: Note | null): string {
+export function getNoteName(note: Note): string {
   const transpose = 1; // Transpose octave for guitar
-  return note
-    ? `notes/${note.name.replace("#", "s").toLowerCase()}${
-        note.octave + transpose
-      }.svg`
-    : "notes/the_lick.svg";
+  return `${note.name.replace("#", "s").toLowerCase()}${
+    note.octave + transpose
+  }`;
+}
+
+export function noteToImage(note: Note | null): string {
+  return note ? `notes/${getNoteName(note)}.svg` : "notes/the_lick.svg";
 }
 
 export const calculateRMS = (buffer: Float32Array): number => {
