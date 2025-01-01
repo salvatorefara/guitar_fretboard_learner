@@ -2,8 +2,8 @@
 - add note selector (natural, sharp, flat, individual notes)
 - add string selector
 - add fret selector
-- add end of practice per note statistics
 - reduce chance of same note appearing consecutively
+- increse note probability based on accuracy
 - add octave shifting feature
 - add instrument recognition
 - add piano support

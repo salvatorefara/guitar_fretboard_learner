@@ -1,14 +1,18 @@
 import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import Legend from "./Legend";
 import NoteStats from "./NoteStats";
+import { getNoteName } from "../utils";
+import { Notes } from "../constants";
 
 interface StatisticsProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   noteAccuracy: Record<string, number | null>;
+  setNoteAccuracy: Dispatch<SetStateAction<Record<string, number | null>>>;
 }
 
 const style = {
@@ -29,8 +33,19 @@ export default function Statistics({
   open,
   setOpen,
   noteAccuracy,
+  setNoteAccuracy,
 }: StatisticsProps) {
   const handleClose = () => setOpen(false);
+
+  const resetNoteAccuracy = () => {
+    setNoteAccuracy(
+      Notes.reduce((acc: any, note) => {
+        acc[getNoteName(note)] = null;
+        return acc;
+      }, {})
+    );
+  };
+
   return (
     <div>
       <Modal
@@ -45,6 +60,13 @@ export default function Statistics({
           </Typography>
           <NoteStats noteAccuracy={noteAccuracy} />
           <Legend />
+          <Button
+            className="button"
+            variant="contained"
+            onClick={resetNoteAccuracy}
+          >
+            Reset
+          </Button>
         </Box>
       </Modal>
     </div>

@@ -358,6 +358,7 @@ const App = () => {
           open={statisticsOpen}
           setOpen={setStatisticsOpen}
           noteAccuracy={noteAccuracy}
+          setNoteAccuracy={setNoteAccuracy}
         />
       </div>
     );
