@@ -26,7 +26,6 @@ const style = {
   bgcolor: "background.paper",
   overflow: "auto",
   boxShadow: 24,
-  p: 4,
 };
 
 export default function Statistics({
