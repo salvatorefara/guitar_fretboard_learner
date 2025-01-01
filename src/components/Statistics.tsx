@@ -8,6 +8,7 @@ import NoteStats from "./NoteStats";
 interface StatisticsProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  noteAccuracy: Record<string, number | null>;
 }
 
 const style = {
@@ -24,7 +25,11 @@ const style = {
   p: 4,
 };
 
-export default function Statistics({ open, setOpen }: StatisticsProps) {
+export default function Statistics({
+  open,
+  setOpen,
+  noteAccuracy,
+}: StatisticsProps) {
   const handleClose = () => setOpen(false);
   return (
     <div>
@@ -38,7 +43,7 @@ export default function Statistics({ open, setOpen }: StatisticsProps) {
           <Typography variant="h5" sx={{ color: "black" }}>
             Statistics
           </Typography>
-          <NoteStats />
+          <NoteStats noteAccuracy={noteAccuracy} />
           <Legend />
         </Box>
       </Modal>

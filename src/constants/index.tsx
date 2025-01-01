@@ -110,3 +110,6 @@ export const NoteStatsColorMap = [
   "#4d9221",
   "#276419",
 ];
+
+const HalfLifeEMA = 5;
+export const AlphaEMA = 1 - Math.exp(Math.log(0.5) / HalfLifeEMA);

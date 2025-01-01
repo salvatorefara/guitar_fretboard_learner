@@ -1,52 +1,8 @@
 import { getColor } from "../utils";
 
-let noteAccuracy: Record<string, number | null> = {
-  a3: 0.5,
-  a4: null,
-  a5: 0.1,
-  a6: 0.3,
-  as3: null,
-  as4: null,
-  as5: 0.7,
-  as6: 1,
-  b3: null,
-  b4: 0.25,
-  b5: 0.85,
-  b6: null,
-  c4: 0,
-  c5: null,
-  c6: 0.99,
-  c7: null,
-  cs4: 0.66,
-  cs5: 0.77,
-  cs6: 0.99,
-  d4: 0.55,
-  d5: null,
-  d6: null,
-  ds4: 0.33,
-  ds5: null,
-  ds6: 0.22,
-  e3: 0.11,
-  e4: null,
-  e5: 0.44,
-  e6: null,
-  f3: null,
-  f4: null,
-  f5: 0.25,
-  f6: null,
-  fs3: null,
-  fs4: 0.45,
-  fs5: null,
-  fs6: null,
-  g3: 0.1,
-  g4: 0.2,
-  g5: 0.3,
-  g6: 0.4,
-  gs3: 0.5,
-  gs4: 0.6,
-  gs5: 0.7,
-  gs6: 0.8,
-};
+interface NoteStatsProps {
+  noteAccuracy: Record<string, number | null>;
+}
 
 const Accidentals = [
   {
@@ -432,7 +388,7 @@ const NoteBodies = [
   },
 ];
 
-export default function NoteStats() {
+export default function NoteStats({ noteAccuracy }: NoteStatsProps) {
   return (
     <div>
       <svg width="850.392px" height="297.638px" viewBox="0 0 850.392 297.638">
