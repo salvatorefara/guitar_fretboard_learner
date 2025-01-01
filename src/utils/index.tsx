@@ -1,4 +1,4 @@
-import { C0, NoteNames, Notes } from "../constants";
+import { C0, NoteNames, Notes, NoteStatsColorMap } from "../constants";
 import { Note } from "../types";
 
 export function getLocalStorageItem<T>(itemName: string, defaultValue: T): T {
@@ -23,13 +23,15 @@ export function drawNote(noteIndexRange: number[]): Note {
   return Notes[noteIndex];
 }
 
-export function noteToImage(note: Note | null): string {
+export function getNoteName(note: Note): string {
   const transpose = 1; // Transpose octave for guitar
-  return note
-    ? `notes/${note.name.replace("#", "s").toLowerCase()}${
-        note.octave + transpose
-      }.svg`
-    : "notes/the_lick.svg";
+  return `${note.name.replace("#", "s").toLowerCase()}${
+    note.octave + transpose
+  }`;
+}
+
+export function noteToImage(note: Note | null): string {
+  return note ? `notes/${getNoteName(note)}.svg` : "notes/the_lick.svg";
 }
 
 export const calculateRMS = (buffer: Float32Array): number => {
@@ -39,3 +41,15 @@ export const calculateRMS = (buffer: Float32Array): number => {
   }
   return Math.sqrt(sum / buffer.length);
 };
+
+export function getColor(value: number | null): string {
+  if (value === null) {
+    return "#000000";
+  }
+  if (value < 0 || value > 1) {
+    throw new Error("Value must be between 0 and 1");
+  }
+
+  const index = Math.floor(value * (NoteStatsColorMap.length - 1));
+  return NoteStatsColorMap[index];
+}

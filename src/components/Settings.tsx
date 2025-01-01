@@ -33,7 +33,10 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 380,
+  maxWidth: "100%",
+  maxHeight: "100%",
   bgcolor: "background.paper",
+  overflow: "auto",
   boxShadow: 24,
   p: 4,
 };

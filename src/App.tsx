@@ -7,14 +7,17 @@ import Clock from "./components/Clock";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
+import Statistics from "./components/Statistics";
 import {
   calculateRMS,
   drawNote,
   getLocalStorageItem,
   getNote,
+  getNoteName,
   noteToImage,
 } from "./utils";
 import {
+  AlphaEMA,
   AudioBufferSize,
   CountdownTime,
   MicSensitivityIndex,
@@ -27,6 +30,15 @@ import { Note, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [noteAccuracy, setNoteAccuracy] = useState(
+    getLocalStorageItem(
+      "noteAccuracy",
+      Notes.reduce((acc: any, note) => {
+        acc[getNoteName(note)] = null;
+        return acc;
+      }, {})
+    )
+  );
   const [useClock, setUseClock] = useState(
     getLocalStorageItem("useClock", true)
   );
@@ -41,6 +53,7 @@ const App = () => {
   );
   const [countdown, setCountdown] = useState(CountdownTime);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [showNoteName, setShowNoteName] = useState(
     getLocalStorageItem("showNoteName", true)
   );
@@ -94,6 +107,7 @@ const App = () => {
 
   useEffect(() => {
     cacheImages();
+    console.log(noteAccuracy);
   }, []);
 
   const imagePath = useMemo(() => {
@@ -190,6 +204,17 @@ const App = () => {
     }
   };
 
+  const updateNoteAccuracy = (note: Note | null, update: number) => {
+    if (note) {
+      const noteName = getNoteName(note);
+      var NewNoteAccuracy = { ...noteAccuracy };
+      NewNoteAccuracy[noteName] = NewNoteAccuracy[noteName]
+        ? AlphaEMA * update + (1 - AlphaEMA) * NewNoteAccuracy[noteName]
+        : update;
+      setNoteAccuracy(NewNoteAccuracy);
+    }
+  };
+
   useEffect(() => {
     console.log("Practice state:", practiceState);
 
@@ -213,9 +238,11 @@ const App = () => {
           currentNote?.octave == detectedNote?.octave
         ) {
           setCorrect((correct) => correct + 1);
+          updateNoteAccuracy(currentNote, 1);
           setPracticeState("New Note");
         } else {
           setIncorrect((incorrect) => incorrect + 1);
+          updateNoteAccuracy(currentNote, 0);
           if (changeNoteOnMistake) {
             setPracticeState("New Note");
           } else {
@@ -270,10 +297,17 @@ const App = () => {
     );
   }, [micSensitivityIndex]);
 
+  useEffect(() => {
+    localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
+  }, [noteAccuracy]);
+
   if (isLoading) {
     return (
       <div className="app">
-        <Header setSettingsOpen={setSettingsOpen} />
+        <Header
+          setSettingsOpen={setSettingsOpen}
+          setStatisticsOpen={setStatisticsOpen}
+        />
         <div className="circular-progress">
           <CircularProgress sx={{ color: "black" }} />
         </div>
@@ -282,7 +316,10 @@ const App = () => {
   } else {
     return (
       <div className="app">
-        <Header setSettingsOpen={setSettingsOpen} />
+        <Header
+          setSettingsOpen={setSettingsOpen}
+          setStatisticsOpen={setStatisticsOpen}
+        />
         <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
         <Typography variant="h2" sx={{ color: "black" }}>
           {["Idle", "Countdown"].includes(practiceState) || !showNoteName
@@ -316,6 +353,12 @@ const App = () => {
           setTimerTime={setTimerTime}
           micSensitivityIndex={micSensitivityIndex}
           setMicSensitivityIndex={setMicSensitivityIndex}
+        />
+        <Statistics
+          open={statisticsOpen}
+          setOpen={setStatisticsOpen}
+          noteAccuracy={noteAccuracy}
+          setNoteAccuracy={setNoteAccuracy}
         />
       </div>
     );
