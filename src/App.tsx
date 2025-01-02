@@ -13,7 +13,7 @@ import {
   drawNote,
   getLocalStorageItem,
   getNote,
-  getNoteName,
+  noteToName,
   noteToImage,
 } from "./utils";
 import {
@@ -34,7 +34,7 @@ const App = () => {
     getLocalStorageItem(
       "noteAccuracy",
       Notes.reduce((acc: any, note) => {
-        acc[getNoteName(note)] = null;
+        acc[noteToName(note)] = null;
         return acc;
       }, {})
     )
@@ -206,7 +206,7 @@ const App = () => {
 
   const updateNoteAccuracy = (note: Note | null, update: number) => {
     if (note) {
-      const noteName = getNoteName(note);
+      const noteName = noteToName(note);
       var NewNoteAccuracy = { ...noteAccuracy };
       NewNoteAccuracy[noteName] = NewNoteAccuracy[noteName]
         ? AlphaEMA * update + (1 - AlphaEMA) * NewNoteAccuracy[noteName]
