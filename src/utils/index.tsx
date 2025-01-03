@@ -38,7 +38,6 @@ export function drawNote(
           !excludeIndexes.includes(index)
         );
       });
-      // const notes = Notes;
       const indexes = notes.map((_, index) => {
         return index;
       });
@@ -70,7 +69,7 @@ export function drawNote(
       console.log("Random value:", randomValue);
       console.log("Selected index:", selectIndex);
 
-      return Notes[indexes[selectIndex]];
+      return notes[indexes[selectIndex]];
   }
 }
 

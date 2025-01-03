@@ -221,7 +221,7 @@ const App = () => {
       case "New Note":
         const randomNote = drawNote(
           noteIndexRange,
-          [],
+          [16, 17, 18, 21, 22],
           noteAccuracy,
           drawNoteMinAccuracy,
           drawNoteMethod
@@ -241,11 +241,11 @@ const App = () => {
           currentNote?.octave == detectedNote?.octave
         ) {
           setCorrect((correct) => correct + 1);
-          updateNoteAccuracy(currentNote, 1);
+          // updateNoteAccuracy(currentNote, 1);
           setPracticeState("New Note");
         } else {
           setIncorrect((incorrect) => incorrect + 1);
-          updateNoteAccuracy(currentNote, 0);
+          // updateNoteAccuracy(currentNote, 0);
           if (changeNoteOnMistake) {
             setPracticeState("New Note");
           } else {
@@ -302,13 +302,12 @@ const App = () => {
   }, [micSensitivityIndex]);
 
   useEffect(() => {
-    console.log("noteAccuracy:", noteAccuracy);
-    localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
-  }, [noteAccuracy]);
+    console.log("Current note:", currentNote ? noteToName(currentNote) : null);
+  }, [currentNote]);
 
   useEffect(() => {
-    console.log("Current note:", currentNote);
-  }, [currentNote]);
+    localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
+  }, [noteAccuracy]);
 
   if (isLoading) {
     return (
