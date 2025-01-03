@@ -32,10 +32,13 @@ export function drawNote(
       return Notes[noteIndex];
     case "accuracy-based":
       const notes = Notes.filter((_, index) => {
-        noteIndexRange[0] <= index &&
+        return (
+          noteIndexRange[0] <= index &&
           index <= noteIndexRange[1] &&
-          !excludeIndexes.includes(index);
+          !excludeIndexes.includes(index)
+        );
       });
+      // const notes = Notes;
       const indexes = notes.map((_, index) => {
         return index;
       });
@@ -53,28 +56,45 @@ export function drawNote(
         return sum + p;
       }, 0);
 
+      const randomValue = Math.random();
       const selectIndex = cumulativeDistribution.findIndex(
-        (cumulativeProb) => Math.random() < cumulativeProb
+        (cumulativeProb) => randomValue < cumulativeProb
       );
+
+      console.log("Notes:", notes);
+      console.log("Indexes:", indexes);
+      console.log("Accuracies:", accuracies);
+      console.log("Weights:", weights);
+      console.log("Probs:", probabilities);
+      console.log("Cumulative Dist:", cumulativeDistribution);
+      console.log("Random value:", randomValue);
+      console.log("Selected index:", selectIndex);
 
       return Notes[indexes[selectIndex]];
   }
 }
 
-export function noteToName(note: Note, transpose: number = 1): string {
-  return `${note.name.replace("#", "s").toLowerCase()}${
-    note.octave + transpose
-  }`;
+export function noteToName(note: Note): string {
+  return `${note.name.replace("#", "s").toLowerCase()}${note.octave}`;
 }
 
-export function nameToNote(noteString: string, transpose: number = 1): Note {
-  const name = noteString.slice(0, -1).replace("s", "#").toUpperCase();
-  const octave = Number(noteString.slice(-1)) - transpose;
-  return { name: name, octave: octave };
+export function transpose(noteName: string, shift: number): string {
+  const namePrefix = noteName.slice(0, -1);
+  const octave = Number(noteName.slice(-1));
+  return `${namePrefix}${shift + octave}`;
 }
 
-export function noteToImage(note: Note | null): string {
-  return note ? `notes/${noteToName(note)}.svg` : "notes/the_lick.svg";
+export function noteToImage(note: Note | null, shift: number = 1): string {
+  return note
+    ? `notes/${transpose(noteToName(note), shift)}.svg`
+    : "notes/the_lick.svg";
+}
+
+export function initializeNoteAccuracy() {
+  return Notes.reduce((acc: any, note) => {
+    acc[noteToName(note)] = null;
+    return acc;
+  }, {});
 }
 
 export const calculateRMS = (buffer: Float32Array): number => {

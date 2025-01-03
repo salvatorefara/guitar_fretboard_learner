@@ -113,3 +113,6 @@ export const NoteStatsColorMap = [
 
 const HalfLifeEMA = 5;
 export const AlphaEMA = 1 - Math.exp(Math.log(0.5) / HalfLifeEMA);
+
+export const drawNoteMethod = "random";
+export const drawNoteMinAccuracy = 0.1;

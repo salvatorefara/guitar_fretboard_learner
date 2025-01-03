@@ -13,6 +13,7 @@ import {
   drawNote,
   getLocalStorageItem,
   getNote,
+  initializeNoteAccuracy,
   noteToName,
   noteToImage,
 } from "./utils";
@@ -20,6 +21,8 @@ import {
   AlphaEMA,
   AudioBufferSize,
   CountdownTime,
+  drawNoteMinAccuracy,
+  drawNoteMethod,
   MicSensitivityIndex,
   MinPitchRMS,
   Notes,
@@ -31,13 +34,7 @@ import "./styles/App.css";
 
 const App = () => {
   const [noteAccuracy, setNoteAccuracy] = useState(
-    getLocalStorageItem(
-      "noteAccuracy",
-      Notes.reduce((acc: any, note) => {
-        acc[noteToName(note)] = null;
-        return acc;
-      }, {})
-    )
+    getLocalStorageItem("noteAccuracy", initializeNoteAccuracy())
   );
   const [useClock, setUseClock] = useState(
     getLocalStorageItem("useClock", true)
@@ -222,7 +219,13 @@ const App = () => {
       case "Idle":
         break;
       case "New Note":
-        const randomNote = drawNote(noteIndexRange);
+        const randomNote = drawNote(
+          noteIndexRange,
+          [],
+          noteAccuracy,
+          drawNoteMinAccuracy,
+          drawNoteMethod
+        );
         setCurrentNote(randomNote);
         setPracticeState("Listening");
         break;
@@ -278,6 +281,7 @@ const App = () => {
   }, [changeNoteOnMistake]);
 
   useEffect(() => {
+    console.log("noteIndexRange:", noteIndexRange);
     localStorage.setItem("noteIndexRange", JSON.stringify(noteIndexRange));
   }, [noteIndexRange]);
 
@@ -298,8 +302,13 @@ const App = () => {
   }, [micSensitivityIndex]);
 
   useEffect(() => {
+    console.log("noteAccuracy:", noteAccuracy);
     localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
   }, [noteAccuracy]);
+
+  useEffect(() => {
+    console.log("Current note:", currentNote);
+  }, [currentNote]);
 
   if (isLoading) {
     return (
