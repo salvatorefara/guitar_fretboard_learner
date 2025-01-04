@@ -16,22 +16,83 @@ export function getNote(pitch: number | null): Note | null {
   return { name: noteName, octave: octave };
 }
 
-export function drawNote(noteIndexRange: number[]): Note {
-  const noteIndex = Math.round(
-    noteIndexRange[0] + Math.random() * (noteIndexRange[1] - noteIndexRange[0])
-  );
-  return Notes[noteIndex];
+export function drawNote(
+  noteIndexRange: number[],
+  excludeIndexes: number[] = [],
+  accuracies: Record<string, number> = {},
+  minAccuracy: number = 0.1,
+  method: "random" | "accuracy-based" = "random"
+): [Note, number] {
+  switch (method) {
+    case "random":
+      const noteIndex = Math.round(
+        noteIndexRange[0] +
+          Math.random() * (noteIndexRange[1] - noteIndexRange[0])
+      );
+      return [Notes[noteIndex], noteIndex];
+    case "accuracy-based":
+      const isIndexValid = (index: number): boolean => {
+        return (
+          noteIndexRange[0] <= index &&
+          index <= noteIndexRange[1] &&
+          !excludeIndexes.includes(index)
+        );
+      };
+      const indexes = Notes.map((_, index) => {
+        return index;
+      });
+      const indexesSelected = indexes.filter((index) => isIndexValid(index));
+      const notesSelected = Notes.filter((_, index) => isIndexValid(index));
+      // const indexes = notes.map((_, index) => {
+      //   return index;
+      // });
+      const weights = notesSelected.map((note, _) => {
+        const noteName = noteToName(note);
+        let accuracy = accuracies[noteName];
+        accuracy = accuracy ? Math.max(accuracy, minAccuracy) : minAccuracy;
+        return 1 / accuracy;
+      });
+      const weightsSum = weights.reduce((sum, w) => sum + w, 0);
+      const probabilities = weights.map((w) => w / weightsSum);
+      const cumulativeDistribution: number[] = [];
+      probabilities.reduce((sum, p, index) => {
+        cumulativeDistribution[index] = sum + p;
+        return sum + p;
+      }, 0);
+
+      const randomValue = Math.random();
+      const selectIndex = cumulativeDistribution.findIndex(
+        (cumulativeProb) => randomValue < cumulativeProb
+      );
+
+      return [
+        Notes[indexesSelected[selectIndex]],
+        indexesSelected[selectIndex],
+      ];
+  }
 }
 
-export function getNoteName(note: Note): string {
-  const transpose = 1; // Transpose octave for guitar
-  return `${note.name.replace("#", "s").toLowerCase()}${
-    note.octave + transpose
-  }`;
+export function noteToName(note: Note): string {
+  return `${note.name.replace("#", "s").toLowerCase()}${note.octave}`;
 }
 
-export function noteToImage(note: Note | null): string {
-  return note ? `notes/${getNoteName(note)}.svg` : "notes/the_lick.svg";
+export function transpose(noteName: string, shift: number): string {
+  const namePrefix = noteName.slice(0, -1);
+  const octave = Number(noteName.slice(-1));
+  return `${namePrefix}${shift + octave}`;
+}
+
+export function noteToImage(note: Note | null, shift: number = 1): string {
+  return note
+    ? `notes/${transpose(noteToName(note), shift)}.svg`
+    : "notes/the_lick.svg";
+}
+
+export function initializeNoteAccuracy() {
+  return Notes.reduce((acc: any, note) => {
+    acc[noteToName(note)] = null;
+    return acc;
+  }, {});
 }
 
 export const calculateRMS = (buffer: Float32Array): number => {

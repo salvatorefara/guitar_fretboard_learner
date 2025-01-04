@@ -1,4 +1,4 @@
-import { getColor } from "../utils";
+import { getColor, transpose } from "../utils";
 
 interface NoteStatsProps {
   noteAccuracy: Record<string, number | null>;
@@ -458,7 +458,7 @@ export default function NoteStats({ noteAccuracy }: NoteStatsProps) {
           <path
             key={index}
             className={accidental.className}
-            fill={getColor(noteAccuracy[accidental.className])}
+            fill={getColor(noteAccuracy[transpose(accidental.className, -1)])}
             transform={accidental.transform}
             d={accidental.d}
           />
@@ -955,7 +955,7 @@ export default function NoteStats({ noteAccuracy }: NoteStatsProps) {
           <path
             key={index}
             className={note.className}
-            fill={getColor(noteAccuracy[note.className])}
+            fill={getColor(noteAccuracy[transpose(note.className, -1)])}
             transform={note.transform}
             d={note.d}
           />

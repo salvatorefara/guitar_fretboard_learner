@@ -13,13 +13,18 @@ import {
   drawNote,
   getLocalStorageItem,
   getNote,
-  getNoteName,
+  initializeNoteAccuracy,
+  noteToName,
   noteToImage,
 } from "./utils";
 import {
   AlphaEMA,
   AudioBufferSize,
   CountdownTime,
+  drawNoteMinAccuracy,
+  drawNoteMethod,
+  indexBufferSizeFraction,
+  maxIndexBufferSize,
   MicSensitivityIndex,
   MinPitchRMS,
   Notes,
@@ -31,13 +36,7 @@ import "./styles/App.css";
 
 const App = () => {
   const [noteAccuracy, setNoteAccuracy] = useState(
-    getLocalStorageItem(
-      "noteAccuracy",
-      Notes.reduce((acc: any, note) => {
-        acc[getNoteName(note)] = null;
-        return acc;
-      }, {})
-    )
+    getLocalStorageItem("noteAccuracy", initializeNoteAccuracy())
   );
   const [useClock, setUseClock] = useState(
     getLocalStorageItem("useClock", true)
@@ -67,6 +66,9 @@ const App = () => {
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [detectedNote, setDetectedNote] = useState<Note | null>(null);
+  const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>(
+    getLocalStorageItem("noteIndexBuffer", [])
+  );
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
   const [newNoteTimestamp, setNewNoteTimestamp] = useState(0);
@@ -206,13 +208,36 @@ const App = () => {
 
   const updateNoteAccuracy = (note: Note | null, update: number) => {
     if (note) {
-      const noteName = getNoteName(note);
+      const noteName = noteToName(note);
       var NewNoteAccuracy = { ...noteAccuracy };
       NewNoteAccuracy[noteName] = NewNoteAccuracy[noteName]
         ? AlphaEMA * update + (1 - AlphaEMA) * NewNoteAccuracy[noteName]
         : update;
       setNoteAccuracy(NewNoteAccuracy);
     }
+  };
+
+  const updateNoteIndexBuffer = (index: number) => {
+    const newNoteIndexBuffer = [
+      ...noteIndexBuffer.slice(-maxIndexBufferSize),
+      index,
+    ];
+    setNoteIndexBuffer(newNoteIndexBuffer);
+
+    console.log("newNoteIndexBuffer:", newNoteIndexBuffer);
+  };
+
+  const getResisedNoteindexBuffer = () => {
+    const notesRangeCount = noteIndexRange[1] - noteIndexRange[0] + 1;
+    const currentBufferSize = Math.min(
+      maxIndexBufferSize,
+      Math.round(indexBufferSizeFraction * notesRangeCount)
+    );
+
+    console.log("notesRangeCount:", notesRangeCount);
+    console.log("currentBufferSize:", currentBufferSize);
+
+    return noteIndexBuffer.slice(-currentBufferSize);
   };
 
   useEffect(() => {
@@ -222,7 +247,14 @@ const App = () => {
       case "Idle":
         break;
       case "New Note":
-        const randomNote = drawNote(noteIndexRange);
+        const [randomNote, noteIndex] = drawNote(
+          noteIndexRange,
+          getResisedNoteindexBuffer(),
+          noteAccuracy,
+          drawNoteMinAccuracy,
+          drawNoteMethod
+        );
+        updateNoteIndexBuffer(noteIndex);
         setCurrentNote(randomNote);
         setPracticeState("Listening");
         break;
@@ -278,6 +310,7 @@ const App = () => {
   }, [changeNoteOnMistake]);
 
   useEffect(() => {
+    console.log("noteIndexRange:", noteIndexRange);
     localStorage.setItem("noteIndexRange", JSON.stringify(noteIndexRange));
   }, [noteIndexRange]);
 
@@ -298,8 +331,16 @@ const App = () => {
   }, [micSensitivityIndex]);
 
   useEffect(() => {
+    console.log("Current note:", currentNote ? noteToName(currentNote) : null);
+  }, [currentNote]);
+
+  useEffect(() => {
     localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
   }, [noteAccuracy]);
+
+  useEffect(() => {
+    localStorage.setItem("noteIndexBuffer", JSON.stringify(noteIndexBuffer));
+  }, [noteIndexBuffer]);
 
   if (isLoading) {
     return (
