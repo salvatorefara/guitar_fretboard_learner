@@ -1,9 +1,10 @@
+- add fret selector
+- add piano support
+- migrate to AudioWorkletNode
+- create logo
+
 - add flat notes
 - add note selector (natural, sharp, flat, individual notes)
 - add string selector
-- add fret selector
 - add octave shifting feature
 - add instrument recognition
-- add piano support
-- create logo
-- migrate to AudioWorkletNode

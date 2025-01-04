@@ -66,7 +66,9 @@ const App = () => {
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [detectedNote, setDetectedNote] = useState<Note | null>(null);
-  const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>([]);
+  const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>(
+    getLocalStorageItem("noteIndexBuffer", [])
+  );
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
   const [newNoteTimestamp, setNewNoteTimestamp] = useState(0);
@@ -335,6 +337,10 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
   }, [noteAccuracy]);
+
+  useEffect(() => {
+    localStorage.setItem("noteIndexBuffer", JSON.stringify(noteIndexBuffer));
+  }, [noteIndexBuffer]);
 
   if (isLoading) {
     return (
