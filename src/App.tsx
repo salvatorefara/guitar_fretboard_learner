@@ -23,6 +23,8 @@ import {
   CountdownTime,
   drawNoteMinAccuracy,
   drawNoteMethod,
+  indexBufferSizeFraction,
+  maxIndexBufferSize,
   MicSensitivityIndex,
   MinPitchRMS,
   Notes,
@@ -64,6 +66,7 @@ const App = () => {
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<Note | null>(null);
   const [detectedNote, setDetectedNote] = useState<Note | null>(null);
+  const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>([]);
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
   const [newNoteTimestamp, setNewNoteTimestamp] = useState(0);
@@ -212,6 +215,29 @@ const App = () => {
     }
   };
 
+  const updateNoteIndexBuffer = (index: number) => {
+    const newNoteIndexBuffer = [
+      ...noteIndexBuffer.slice(-maxIndexBufferSize),
+      index,
+    ];
+    setNoteIndexBuffer(newNoteIndexBuffer);
+
+    console.log("newNoteIndexBuffer:", newNoteIndexBuffer);
+  };
+
+  const getResisedNoteindexBuffer = () => {
+    const notesRangeCount = noteIndexRange[1] - noteIndexRange[0] + 1;
+    const currentBufferSize = Math.min(
+      maxIndexBufferSize,
+      Math.round(indexBufferSizeFraction * notesRangeCount)
+    );
+
+    console.log("notesRangeCount:", notesRangeCount);
+    console.log("currentBufferSize:", currentBufferSize);
+
+    return noteIndexBuffer.slice(-currentBufferSize);
+  };
+
   useEffect(() => {
     console.log("Practice state:", practiceState);
 
@@ -221,11 +247,12 @@ const App = () => {
       case "New Note":
         const [randomNote, noteIndex] = drawNote(
           noteIndexRange,
-          [16, 17, 18, 21, 22],
+          getResisedNoteindexBuffer(),
           noteAccuracy,
           drawNoteMinAccuracy,
           drawNoteMethod
         );
+        updateNoteIndexBuffer(noteIndex);
         setCurrentNote(randomNote);
         setPracticeState("Listening");
         break;
@@ -241,11 +268,11 @@ const App = () => {
           currentNote?.octave == detectedNote?.octave
         ) {
           setCorrect((correct) => correct + 1);
-          // updateNoteAccuracy(currentNote, 1);
+          updateNoteAccuracy(currentNote, 1);
           setPracticeState("New Note");
         } else {
           setIncorrect((incorrect) => incorrect + 1);
-          // updateNoteAccuracy(currentNote, 0);
+          updateNoteAccuracy(currentNote, 0);
           if (changeNoteOnMistake) {
             setPracticeState("New Note");
           } else {

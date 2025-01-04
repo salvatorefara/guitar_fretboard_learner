@@ -8,7 +8,7 @@ import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { MinPitchRMS, Notes, TimerTimes } from "../constants";
+import { MinNoteRange, MinPitchRMS, Notes, TimerTimes } from "../constants";
 
 interface SettingsProps {
   open: boolean;
@@ -96,7 +96,9 @@ export default function Settings({
 
   const handleNoteRangeChange = (event: any) => {
     if (event.target) {
-      setNoteIndexRange(event.target.value as number[]);
+      if (event.target.value[1] - event.target.value[0] + 1 >= MinNoteRange) {
+        setNoteIndexRange(event.target.value as number[]);
+      }
     }
   };
 

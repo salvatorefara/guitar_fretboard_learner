@@ -65,15 +65,6 @@ export function drawNote(
         (cumulativeProb) => randomValue < cumulativeProb
       );
 
-      console.log("Notes:", notesSelected);
-      console.log("Indexes:", indexesSelected);
-      console.log("Accuracies:", accuracies);
-      console.log("Weights:", weights);
-      console.log("Probs:", probabilities);
-      console.log("Cumulative Dist:", cumulativeDistribution);
-      console.log("Random value:", randomValue);
-      console.log("Selected index:", selectIndex);
-
       return [
         Notes[indexesSelected[selectIndex]],
         indexesSelected[selectIndex],
