@@ -2,8 +2,8 @@
 - give feedback (correct/wrong)
 - add piano support
 - migrate to AudioWorkletNode
-- create logo
 
+- create logo
 - add flat notes
 - add note selector (natural, sharp, flat, individual notes)
 - add string selector
