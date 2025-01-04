@@ -22,26 +22,31 @@ export function drawNote(
   accuracies: Record<string, number> = {},
   minAccuracy: number = 0.1,
   method: "random" | "accuracy-based" = "random"
-): Note {
+): [Note, number] {
   switch (method) {
     case "random":
       const noteIndex = Math.round(
         noteIndexRange[0] +
           Math.random() * (noteIndexRange[1] - noteIndexRange[0])
       );
-      return Notes[noteIndex];
+      return [Notes[noteIndex], noteIndex];
     case "accuracy-based":
-      const notes = Notes.filter((_, index) => {
+      const isIndexValid = (index: number): boolean => {
         return (
           noteIndexRange[0] <= index &&
           index <= noteIndexRange[1] &&
           !excludeIndexes.includes(index)
         );
-      });
-      const indexes = notes.map((_, index) => {
+      };
+      const indexes = Notes.map((_, index) => {
         return index;
       });
-      const weights = notes.map((note, _) => {
+      const indexesSelected = indexes.filter((index) => isIndexValid(index));
+      const notesSelected = Notes.filter((_, index) => isIndexValid(index));
+      // const indexes = notes.map((_, index) => {
+      //   return index;
+      // });
+      const weights = notesSelected.map((note, _) => {
         const noteName = noteToName(note);
         let accuracy = accuracies[noteName];
         accuracy = accuracy ? Math.max(accuracy, minAccuracy) : minAccuracy;
@@ -60,8 +65,8 @@ export function drawNote(
         (cumulativeProb) => randomValue < cumulativeProb
       );
 
-      console.log("Notes:", notes);
-      console.log("Indexes:", indexes);
+      console.log("Notes:", notesSelected);
+      console.log("Indexes:", indexesSelected);
       console.log("Accuracies:", accuracies);
       console.log("Weights:", weights);
       console.log("Probs:", probabilities);
@@ -69,7 +74,10 @@ export function drawNote(
       console.log("Random value:", randomValue);
       console.log("Selected index:", selectIndex);
 
-      return notes[indexes[selectIndex]];
+      return [
+        Notes[indexesSelected[selectIndex]],
+        indexesSelected[selectIndex],
+      ];
   }
 }
 

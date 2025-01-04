@@ -219,7 +219,7 @@ const App = () => {
       case "Idle":
         break;
       case "New Note":
-        const randomNote = drawNote(
+        const [randomNote, noteIndex] = drawNote(
           noteIndexRange,
           [16, 17, 18, 21, 22],
           noteAccuracy,

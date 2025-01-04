@@ -116,3 +116,6 @@ export const AlphaEMA = 1 - Math.exp(Math.log(0.5) / HalfLifeEMA);
 
 export const drawNoteMethod = "accuracy-based";
 export const drawNoteMinAccuracy = 0.1;
+
+export const maxNoteBufferSize = 10;
+export const noteBufferSizeFraction = 0.2;
