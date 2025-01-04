@@ -1,4 +1,5 @@
 - add fret selector
+- give feedback (correct/wrong)
 - add piano support
 - migrate to AudioWorkletNode
 - create logo
