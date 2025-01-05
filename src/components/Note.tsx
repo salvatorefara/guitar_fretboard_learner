@@ -17,11 +17,19 @@ export default function Note({
 }: NoteProps) {
   return (
     <div className="note">
-      <img
-        className="note-image"
-        src={imagePath}
-        alt={noteToImage(currentNote)}
-      />
+      <div className="note-image-feedback">
+        <div></div>
+        <img
+          className="note-image"
+          src={imagePath}
+          alt={noteToImage(currentNote)}
+        />
+        <div className="note-feedback">
+          <Typography variant="h3" sx={{ color: "black" }}>
+            +1
+          </Typography>
+        </div>
+      </div>
       <Typography variant="h2" sx={{ color: "black" }}>
         {["Idle", "Countdown"].includes(practiceState) || !showNoteName
           ? ""
