@@ -26,7 +26,7 @@ export default function Note({
         />
         <div className="note-feedback">
           <Typography variant="h3" sx={{ color: "black" }}>
-            +1
+            {practiceState === "Feedback" ? "+1" : ""}
           </Typography>
         </div>
       </div>

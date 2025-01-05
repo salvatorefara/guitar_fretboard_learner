@@ -8,7 +8,6 @@ import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
 import Statistics from "./components/Statistics";
-import Typography from "@mui/material/Typography";
 import {
   calculateRMS,
   drawNote,
@@ -22,10 +21,11 @@ import {
   AlphaEMA,
   AudioBufferSize,
   CountdownTime,
-  drawNoteMinAccuracy,
-  drawNoteMethod,
-  indexBufferSizeFraction,
-  maxIndexBufferSize,
+  DrawNoteMinAccuracy,
+  DrawNoteMethod,
+  FeedbackDuration,
+  IndexBufferSizeFraction,
+  MaxIndexBufferSize,
   MicSensitivityIndex,
   MinPitchRMS,
   Notes,
@@ -220,7 +220,7 @@ const App = () => {
 
   const updateNoteIndexBuffer = (index: number) => {
     const newNoteIndexBuffer = [
-      ...noteIndexBuffer.slice(-maxIndexBufferSize),
+      ...noteIndexBuffer.slice(-MaxIndexBufferSize),
       index,
     ];
     setNoteIndexBuffer(newNoteIndexBuffer);
@@ -231,8 +231,8 @@ const App = () => {
   const getResisedNoteindexBuffer = () => {
     const notesRangeCount = noteIndexRange[1] - noteIndexRange[0] + 1;
     const currentBufferSize = Math.min(
-      maxIndexBufferSize,
-      Math.round(indexBufferSizeFraction * notesRangeCount)
+      MaxIndexBufferSize,
+      Math.round(IndexBufferSizeFraction * notesRangeCount)
     );
 
     console.log("notesRangeCount:", notesRangeCount);
@@ -252,8 +252,8 @@ const App = () => {
           noteIndexRange,
           getResisedNoteindexBuffer(),
           noteAccuracy,
-          drawNoteMinAccuracy,
-          drawNoteMethod
+          DrawNoteMinAccuracy,
+          DrawNoteMethod
         );
         updateNoteIndexBuffer(noteIndex);
         setCurrentNote(randomNote);
@@ -262,26 +262,34 @@ const App = () => {
       case "Listening":
         if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
           setOldNoteTimestamp(newNoteTimestamp);
-          setPracticeState("Feedback");
+          if (
+            currentNote?.name == detectedNote?.name &&
+            currentNote?.octave == detectedNote?.octave
+          ) {
+            setCorrect((correct) => correct + 1);
+            updateNoteAccuracy(currentNote, 1);
+            setPracticeState("Feedback");
+            setTimeout(() => {
+              setPracticeState("New Note");
+            }, FeedbackDuration);
+          } else {
+            setIncorrect((incorrect) => incorrect + 1);
+            updateNoteAccuracy(currentNote, 0);
+            if (changeNoteOnMistake) {
+              setPracticeState("Feedback");
+              setTimeout(() => {
+                setPracticeState("New Note");
+              }, FeedbackDuration);
+            } else {
+              setPracticeState("Feedback");
+              setTimeout(() => {
+                setPracticeState("Listening");
+              }, FeedbackDuration);
+            }
+          }
         }
         break;
       case "Feedback":
-        if (
-          currentNote?.name == detectedNote?.name &&
-          currentNote?.octave == detectedNote?.octave
-        ) {
-          setCorrect((correct) => correct + 1);
-          updateNoteAccuracy(currentNote, 1);
-          setPracticeState("New Note");
-        } else {
-          setIncorrect((incorrect) => incorrect + 1);
-          updateNoteAccuracy(currentNote, 0);
-          if (changeNoteOnMistake) {
-            setPracticeState("New Note");
-          } else {
-            setPracticeState("Listening");
-          }
-        }
         break;
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
