@@ -2,12 +2,13 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import * as Pitchfinder from "pitchfinder";
 import Button from "@mui/material/Button";
 import { CircularProgress } from "@mui/material";
-import Typography from "@mui/material/Typography";
 import Clock from "./components/Clock";
+import Note from "./components/Note";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
 import Statistics from "./components/Statistics";
+import Typography from "@mui/material/Typography";
 import {
   calculateRMS,
   drawNote,
@@ -31,7 +32,7 @@ import {
   SampleRate,
   TimerTime,
 } from "./constants";
-import { Note, PracticeState } from "./types";
+import { Note as NoteType, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
@@ -64,8 +65,8 @@ const App = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
-  const [currentNote, setCurrentNote] = useState<Note | null>(null);
-  const [detectedNote, setDetectedNote] = useState<Note | null>(null);
+  const [currentNote, setCurrentNote] = useState<NoteType | null>(null);
+  const [detectedNote, setDetectedNote] = useState<NoteType | null>(null);
   const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>(
     getLocalStorageItem("noteIndexBuffer", [])
   );
@@ -206,7 +207,7 @@ const App = () => {
     }
   };
 
-  const updateNoteAccuracy = (note: Note | null, update: number) => {
+  const updateNoteAccuracy = (note: NoteType | null, update: number) => {
     if (note) {
       const noteName = noteToName(note);
       var NewNoteAccuracy = { ...noteAccuracy };
@@ -361,12 +362,12 @@ const App = () => {
           setSettingsOpen={setSettingsOpen}
           setStatisticsOpen={setStatisticsOpen}
         />
-        <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
-        <Typography variant="h2" sx={{ color: "black" }}>
-          {["Idle", "Countdown"].includes(practiceState) || !showNoteName
-            ? ""
-            : currentNote?.name}
-        </Typography>
+        <Note
+          imagePath={imagePath}
+          currentNote={currentNote}
+          practiceState={practiceState}
+          showNoteName={showNoteName}
+        />
         <Clock
           practiceState={practiceState}
           useClock={useClock}
