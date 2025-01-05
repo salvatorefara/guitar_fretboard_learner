@@ -17,7 +17,7 @@ export default function Header({
   setStatisticsOpen,
 }: HeaderProps) {
   return (
-    <Box sx={{ flexGrow: 1 }}>
+    <Box sx={{ flexGrow: 1, zIndex: 1 }}>
       <AppBar position="static">
         <Toolbar>
           <IconButton

@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import * as Pitchfinder from "pitchfinder";
 import Button from "@mui/material/Button";
 import { CircularProgress } from "@mui/material";
-import Typography from "@mui/material/Typography";
 import Clock from "./components/Clock";
+import Note from "./components/Note";
 import Header from "./components/Header";
 import Score from "./components/Score";
 import Settings from "./components/Settings";
@@ -21,17 +21,18 @@ import {
   AlphaEMA,
   AudioBufferSize,
   CountdownTime,
-  drawNoteMinAccuracy,
-  drawNoteMethod,
-  indexBufferSizeFraction,
-  maxIndexBufferSize,
+  DrawNoteMinAccuracy,
+  DrawNoteMethod,
+  FeedbackDuration,
+  IndexBufferSizeFraction,
+  MaxIndexBufferSize,
   MicSensitivityIndex,
   MinPitchRMS,
   Notes,
   SampleRate,
   TimerTime,
 } from "./constants";
-import { Note, PracticeState } from "./types";
+import { Note as NoteType, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
@@ -64,13 +65,14 @@ const App = () => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
-  const [currentNote, setCurrentNote] = useState<Note | null>(null);
-  const [detectedNote, setDetectedNote] = useState<Note | null>(null);
+  const [currentNote, setCurrentNote] = useState<NoteType | null>(null);
+  const [detectedNote, setDetectedNote] = useState<NoteType | null>(null);
   const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>(
     getLocalStorageItem("noteIndexBuffer", [])
   );
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const [newNoteTimestamp, setNewNoteTimestamp] = useState(0);
   const [oldNoteTimestamp, setOldNoteTimestamp] = useState(0);
 
@@ -206,7 +208,7 @@ const App = () => {
     }
   };
 
-  const updateNoteAccuracy = (note: Note | null, update: number) => {
+  const updateNoteAccuracy = (note: NoteType | null, update: number) => {
     if (note) {
       const noteName = noteToName(note);
       var NewNoteAccuracy = { ...noteAccuracy };
@@ -219,7 +221,7 @@ const App = () => {
 
   const updateNoteIndexBuffer = (index: number) => {
     const newNoteIndexBuffer = [
-      ...noteIndexBuffer.slice(-maxIndexBufferSize),
+      ...noteIndexBuffer.slice(-MaxIndexBufferSize),
       index,
     ];
     setNoteIndexBuffer(newNoteIndexBuffer);
@@ -230,8 +232,8 @@ const App = () => {
   const getResisedNoteindexBuffer = () => {
     const notesRangeCount = noteIndexRange[1] - noteIndexRange[0] + 1;
     const currentBufferSize = Math.min(
-      maxIndexBufferSize,
-      Math.round(indexBufferSizeFraction * notesRangeCount)
+      MaxIndexBufferSize,
+      Math.round(IndexBufferSizeFraction * notesRangeCount)
     );
 
     console.log("notesRangeCount:", notesRangeCount);
@@ -251,8 +253,8 @@ const App = () => {
           noteIndexRange,
           getResisedNoteindexBuffer(),
           noteAccuracy,
-          drawNoteMinAccuracy,
-          drawNoteMethod
+          DrawNoteMinAccuracy,
+          DrawNoteMethod
         );
         updateNoteIndexBuffer(noteIndex);
         setCurrentNote(randomNote);
@@ -261,26 +263,36 @@ const App = () => {
       case "Listening":
         if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
           setOldNoteTimestamp(newNoteTimestamp);
-          setPracticeState("Feedback");
+          if (
+            currentNote?.name == detectedNote?.name &&
+            currentNote?.octave == detectedNote?.octave
+          ) {
+            setIsAnswerCorrect(true);
+            setCorrect((correct) => correct + 1);
+            updateNoteAccuracy(currentNote, 1);
+            setPracticeState("Feedback");
+            setTimeout(() => {
+              setPracticeState("New Note");
+            }, FeedbackDuration);
+          } else {
+            setIsAnswerCorrect(false);
+            setIncorrect((incorrect) => incorrect + 1);
+            updateNoteAccuracy(currentNote, 0);
+            if (changeNoteOnMistake) {
+              setPracticeState("Feedback");
+              setTimeout(() => {
+                setPracticeState("New Note");
+              }, FeedbackDuration);
+            } else {
+              setPracticeState("Feedback");
+              setTimeout(() => {
+                setPracticeState("Listening");
+              }, FeedbackDuration);
+            }
+          }
         }
         break;
       case "Feedback":
-        if (
-          currentNote?.name == detectedNote?.name &&
-          currentNote?.octave == detectedNote?.octave
-        ) {
-          setCorrect((correct) => correct + 1);
-          updateNoteAccuracy(currentNote, 1);
-          setPracticeState("New Note");
-        } else {
-          setIncorrect((incorrect) => incorrect + 1);
-          updateNoteAccuracy(currentNote, 0);
-          if (changeNoteOnMistake) {
-            setPracticeState("New Note");
-          } else {
-            setPracticeState("Listening");
-          }
-        }
         break;
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
@@ -361,12 +373,13 @@ const App = () => {
           setSettingsOpen={setSettingsOpen}
           setStatisticsOpen={setStatisticsOpen}
         />
-        <img src={imagePath} className="note" alt={noteToImage(currentNote)} />
-        <Typography variant="h2" sx={{ color: "black" }}>
-          {["Idle", "Countdown"].includes(practiceState) || !showNoteName
-            ? ""
-            : currentNote?.name}
-        </Typography>
+        <Note
+          imagePath={imagePath}
+          currentNote={currentNote}
+          practiceState={practiceState}
+          showNoteName={showNoteName}
+          isAnswerCorrect={isAnswerCorrect}
+        />
         <Clock
           practiceState={practiceState}
           useClock={useClock}

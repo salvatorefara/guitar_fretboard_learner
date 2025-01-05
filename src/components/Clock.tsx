@@ -20,10 +20,18 @@ export default function Clock({
   setCountdown,
 }: ClockProps) {
   if (practiceState === "Idle" || !useClock) {
-    return <div></div>;
+    return <div className="clock"></div>;
   } else if (practiceState === "Countdown") {
-    return <Countdown time={countdown} setTime={setCountdown} />;
+    return (
+      <div className="clock">
+        <Countdown time={countdown} setTime={setCountdown} />
+      </div>
+    );
   } else {
-    return <Timer time={timer} setTime={setTimer} />;
+    return (
+      <div className="clock">
+        <Timer time={timer} setTime={setTimer} />
+      </div>
+    );
   }
 }
