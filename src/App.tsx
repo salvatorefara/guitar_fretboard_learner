@@ -72,6 +72,7 @@ const App = () => {
   );
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const [newNoteTimestamp, setNewNoteTimestamp] = useState(0);
   const [oldNoteTimestamp, setOldNoteTimestamp] = useState(0);
 
@@ -266,6 +267,7 @@ const App = () => {
             currentNote?.name == detectedNote?.name &&
             currentNote?.octave == detectedNote?.octave
           ) {
+            setIsAnswerCorrect(true);
             setCorrect((correct) => correct + 1);
             updateNoteAccuracy(currentNote, 1);
             setPracticeState("Feedback");
@@ -273,6 +275,7 @@ const App = () => {
               setPracticeState("New Note");
             }, FeedbackDuration);
           } else {
+            setIsAnswerCorrect(false);
             setIncorrect((incorrect) => incorrect + 1);
             updateNoteAccuracy(currentNote, 0);
             if (changeNoteOnMistake) {
@@ -375,6 +378,7 @@ const App = () => {
           currentNote={currentNote}
           practiceState={practiceState}
           showNoteName={showNoteName}
+          isAnswerCorrect={isAnswerCorrect}
         />
         <Clock
           practiceState={practiceState}
