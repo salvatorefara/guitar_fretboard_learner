@@ -79,7 +79,7 @@ const App = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const scriptProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const workletNodeRef = useRef<AudioWorkletNode | null>(null);
   const previousPitchRMSRef = useRef(0);
   const imageCache = useRef<{ [key: string]: HTMLImageElement }>({});
 
@@ -148,46 +148,40 @@ const App = () => {
       const audioContext = new window.AudioContext({
         sampleRate: SampleRate,
       });
+      await audioContext.audioWorklet.addModule("src/audio/PitchProcessor.js");
       const source = audioContext.createMediaStreamSource(stream);
 
-      const scriptProcessor = audioContext.createScriptProcessor(
-        AudioBufferSize,
-        1,
-        1
-      );
-      scriptProcessor.onaudioprocess = (event) => {
-        const inputBuffer = event.inputBuffer.getChannelData(0);
-        const inputRMS = calculateRMS(inputBuffer);
-        const detectedPitch =
-          inputRMS > MinPitchRMS[micSensitivityIndex]
-            ? detectPitch(inputBuffer)
-            : null;
-        const pitchRMS = calculateRMS(inputBuffer);
+      const workletNode = new AudioWorkletNode(audioContext, "pitch-processor");
+
+      workletNode.port.onmessage = (event) => {
+        var { detectedPitch, inputRMS } = event.data;
+        detectedPitch =
+          inputRMS > MinPitchRMS[micSensitivityIndex] ? detectedPitch : null;
         const note = getNote(detectedPitch);
 
         if (!detectedPitch) {
           previousPitchRMSRef.current = MinPitchRMS[micSensitivityIndex];
         } else if (
-          pitchRMS >
+          inputRMS >
           MinPitchRMS[micSensitivityIndex] + previousPitchRMSRef.current
         ) {
           console.log("New note!");
           setNewNoteTimestamp(Date.now());
-          previousPitchRMSRef.current = pitchRMS;
+          previousPitchRMSRef.current = inputRMS;
         } else {
-          previousPitchRMSRef.current = pitchRMS;
+          previousPitchRMSRef.current = inputRMS;
         }
 
         setDetectedNote(note);
       };
 
-      source.connect(scriptProcessor);
-      scriptProcessor.connect(audioContext.destination);
+      source.connect(workletNode);
+      workletNode.connect(audioContext.destination);
 
       mediaStreamRef.current = stream;
       audioContextRef.current = audioContext;
       sourceRef.current = source;
-      scriptProcessorRef.current = scriptProcessor;
+      workletNodeRef.current = workletNode;
     } catch (err) {
       console.error("Error accessing microphone:", err);
     }
@@ -200,8 +194,8 @@ const App = () => {
     if (sourceRef.current) {
       sourceRef.current.disconnect();
     }
-    if (scriptProcessorRef.current) {
-      scriptProcessorRef.current.disconnect();
+    if (workletNodeRef.current) {
+      workletNodeRef.current.disconnect();
     }
     if (audioContextRef.current) {
       audioContextRef.current.close();
@@ -243,8 +237,6 @@ const App = () => {
   };
 
   useEffect(() => {
-    console.log("Practice state:", practiceState);
-
     switch (practiceState) {
       case "Idle":
         break;
@@ -262,6 +254,7 @@ const App = () => {
         break;
       case "Listening":
         if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
+          console.log(detectedNote);
           setOldNoteTimestamp(newNoteTimestamp);
           if (
             currentNote?.name == detectedNote?.name &&
@@ -296,6 +289,10 @@ const App = () => {
         break;
     }
   }, [practiceState, newNoteTimestamp, detectedNote]);
+
+  useEffect(() => {
+    console.log("Practice state:", practiceState);
+  }, [practiceState]);
 
   useEffect(() => {
     if (countdown === 0 && practiceState === "Countdown") {
