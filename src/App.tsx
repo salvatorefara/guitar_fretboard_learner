@@ -19,7 +19,6 @@ import {
 } from "./utils";
 import {
   AlphaEMA,
-  AudioBufferSize,
   CountdownTime,
   DrawNoteMinAccuracy,
   DrawNoteMethod,
