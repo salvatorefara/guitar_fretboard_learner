@@ -66,7 +66,7 @@ export const Notes: Note[] = [
 ];
 
 export const SampleRate = 44100;
-export const AudioBufferSize = 4096;
+export const AudioBufferSize = 8192;
 
 export const MicSensitivityIndex = 4;
 export const MinPitchRMS = [
