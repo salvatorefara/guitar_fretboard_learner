@@ -148,7 +148,7 @@ const App = () => {
         sampleRate: SampleRate,
         latencyHint: "playback",
       });
-      await audioContext.audioWorklet.addModule("src/audio/BufferProcessor.js");
+      await audioContext.audioWorklet.addModule("audio/BufferProcessor.js");
       const source = audioContext.createMediaStreamSource(stream);
 
       const options = {
