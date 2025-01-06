@@ -13,10 +13,10 @@ class PitchProcessor extends AudioWorkletProcessor {
     return [];
   }
 
-  constructor() {
+  constructor(options) {
     super();
     this.detectPitch = Pitchfinder.AMDF({
-      sampleRate: sampleRate,
+      sampleRate: options.processorOptions.sampleRate || 44100,
       minFrequency: 70,
       maxFrequency: 1500,
     });
@@ -26,6 +26,7 @@ class PitchProcessor extends AudioWorkletProcessor {
     const input = inputs[0];
     if (input && input.length > 0) {
       const channelData = input[0];
+      console.log(channelData.length);
       const inputRMS = calculateRMS(channelData);
       const detectedPitch = this.detectPitch(channelData);
 

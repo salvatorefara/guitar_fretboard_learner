@@ -147,16 +147,30 @@ const App = () => {
       });
       const audioContext = new window.AudioContext({
         sampleRate: SampleRate,
+        latencyHint: "playback",
       });
-      await audioContext.audioWorklet.addModule("src/audio/PitchProcessor.js");
+      await audioContext.audioWorklet.addModule("src/audio/BufferProcessor.js");
       const source = audioContext.createMediaStreamSource(stream);
 
-      const workletNode = new AudioWorkletNode(audioContext, "pitch-processor");
+      const options = {
+        processorOptions: {
+          sampleRate: audioContext.sampleRate,
+        },
+      };
+
+      const workletNode = new AudioWorkletNode(
+        audioContext,
+        "buffer-processor",
+        options
+      );
 
       workletNode.port.onmessage = (event) => {
-        var { detectedPitch, inputRMS } = event.data;
-        detectedPitch =
-          inputRMS > MinPitchRMS[micSensitivityIndex] ? detectedPitch : null;
+        const inputBuffer = event.data;
+        const inputRMS = calculateRMS(inputBuffer);
+        const detectedPitch =
+          inputRMS > MinPitchRMS[micSensitivityIndex]
+            ? detectPitch(inputBuffer)
+            : null;
         const note = getNote(detectedPitch);
 
         if (!detectedPitch) {
