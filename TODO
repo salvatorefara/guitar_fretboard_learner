@@ -1,7 +1,5 @@
-- add fret selector
-- give feedback (correct/wrong)
 - add piano support
-- migrate to AudioWorkletNode
+- add time-to-correct note tracking
 
 - create logo
 - add flat notes

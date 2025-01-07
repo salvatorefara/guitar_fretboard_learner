@@ -1,5 +1,6 @@
 /**
   An in-place replacement for ScriptProcessorNode using AudioWorklet
+  https://gist.github.com/louisgv/f210a1139d955baf511ff35f58fc8db1
 */
 class BufferProcessor extends AudioWorkletProcessor {
   // 0. Determine the buffer size (this is the same as the 1st argument of ScriptProcessor)
