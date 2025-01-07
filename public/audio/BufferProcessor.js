@@ -3,7 +3,7 @@
 */
 class BufferProcessor extends AudioWorkletProcessor {
   // 0. Determine the buffer size (this is the same as the 1st argument of ScriptProcessor)
-  bufferSize = 8192;
+  bufferSize = 4096;
   // 1. Track the current buffer fill level
   _bytesWritten = 0;
 
