@@ -1,9 +1,3 @@
-- add piano support
 - add time-to-correct note tracking
-
-- create logo
-- add flat notes
-- add note selector (natural, sharp, flat, individual notes)
-- add string selector
+- add piano support
 - add octave shifting feature
-- add instrument recognition
