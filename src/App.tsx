@@ -146,21 +146,13 @@ const App = () => {
       });
       const audioContext = new window.AudioContext({
         sampleRate: SampleRate,
-        latencyHint: "playback",
       });
       await audioContext.audioWorklet.addModule("audio/BufferProcessor.js");
       const source = audioContext.createMediaStreamSource(stream);
 
-      const options = {
-        processorOptions: {
-          sampleRate: audioContext.sampleRate,
-        },
-      };
-
       const workletNode = new AudioWorkletNode(
         audioContext,
-        "buffer-processor",
-        options
+        "buffer-processor"
       );
 
       workletNode.port.onmessage = (event) => {
