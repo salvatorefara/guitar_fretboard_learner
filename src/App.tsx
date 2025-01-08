@@ -24,6 +24,7 @@ import {
   DrawNoteMethod,
   FeedbackDuration,
   IndexBufferSizeFraction,
+  InstrumentOctaveShift,
   MaxIndexBufferSize,
   MicSensitivityIndex,
   MinPitchRMS,
@@ -113,14 +114,20 @@ const App = () => {
 
   useEffect(() => {
     cacheImages();
-    console.log(noteAccuracy);
   }, []);
 
   const imagePath = useMemo(() => {
     if (["Idle", "Countdown"].includes(practiceState)) {
-      return imageCache.current[noteToImage(null)]?.src || "notes/the_lick.svg";
+      return (
+        imageCache.current[noteToImage(null, InstrumentOctaveShift[instrument])]
+          ?.src || "notes/the_lick.svg"
+      );
     } else if (currentNote) {
-      return imageCache.current[noteToImage(currentNote)]?.src || "";
+      return (
+        imageCache.current[
+          noteToImage(currentNote, InstrumentOctaveShift[instrument])
+        ]?.src || ""
+      );
     }
     return "";
   }, [practiceState, currentNote]);
@@ -360,6 +367,9 @@ const App = () => {
   }, [noteIndexBuffer]);
 
   useEffect(() => {
+    setPracticeState("Idle");
+    stopListening();
+    setNoteAccuracy(initializeNoteAccuracy());
     localStorage.setItem("instrument", JSON.stringify(instrument));
   }, [instrument]);
 
@@ -388,6 +398,7 @@ const App = () => {
           practiceState={practiceState}
           showNoteName={showNoteName}
           isAnswerCorrect={isAnswerCorrect}
+          instrument={instrument}
         />
         <Clock
           practiceState={practiceState}

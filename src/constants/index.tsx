@@ -108,6 +108,11 @@ export const Instruments = [
   },
 ];
 
+export const InstrumentOctaveShift: { [key: string]: number } = {
+  guitar: 1,
+  piano: 0,
+};
+
 export const NoteStatsColorMap = [
   "#8e0152",
   "#c51b7d",
