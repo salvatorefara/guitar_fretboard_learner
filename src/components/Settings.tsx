@@ -8,11 +8,19 @@ import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { MinNoteRange, MinPitchRMS, Notes, TimerTimes } from "../constants";
+import {
+  Instruments,
+  MinNoteRange,
+  MinPitchRMS,
+  Notes,
+  TimerTimes,
+} from "../constants";
 
 interface SettingsProps {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
+  instrument: string;
+  setInstrument: Dispatch<SetStateAction<string>>;
   showNoteName: boolean;
   setShowNoteName: Dispatch<SetStateAction<boolean>>;
   changeNoteOnMistake: boolean;
@@ -75,6 +83,8 @@ const IOSSlider = styled(Slider)(({ theme }) => ({
 export default function Settings({
   open,
   setOpen,
+  instrument,
+  setInstrument,
   showNoteName,
   setShowNoteName,
   changeNoteOnMistake,
@@ -120,6 +130,34 @@ export default function Settings({
           <Typography variant="h5" sx={{ color: "black" }}>
             Settings
           </Typography>
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid>
+              <TextField
+                id="standard-select-currency-native"
+                select
+                value={instrument}
+                onChange={(event) => {
+                  setInstrument(event.target.value);
+                }}
+                slotProps={{
+                  select: {
+                    native: true,
+                  },
+                }}
+                variant="standard"
+              >
+                {Instruments.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </TextField>
+            </Grid>
+            <Grid>
+              <Typography sx={{ color: "black" }}>Instrument</Typography>
+            </Grid>
+          </Grid>
+
           <FormControlLabel
             label="Show note name"
             sx={{ color: "black" }}
@@ -170,7 +208,6 @@ export default function Settings({
                 onChange={(event) => {
                   setTimerTime(Number(event.target.value));
                 }}
-                defaultValue="EUR"
                 slotProps={{
                   select: {
                     native: true,

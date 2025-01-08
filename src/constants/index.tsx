@@ -97,6 +97,17 @@ export const TimerTimes = [
   },
 ];
 
+export const Instruments = [
+  {
+    value: "guitar",
+    label: "guitar",
+  },
+  {
+    value: "piano",
+    label: "piano",
+  },
+];
+
 export const NoteStatsColorMap = [
   "#8e0152",
   "#c51b7d",

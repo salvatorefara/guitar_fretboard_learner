@@ -35,6 +35,9 @@ import { Note as NoteType, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [instrument, setInstrument] = useState(
+    getLocalStorageItem("instrument", "guitar")
+  );
   const [noteAccuracy, setNoteAccuracy] = useState(
     getLocalStorageItem("noteAccuracy", initializeNoteAccuracy())
   );
@@ -356,6 +359,10 @@ const App = () => {
     localStorage.setItem("noteIndexBuffer", JSON.stringify(noteIndexBuffer));
   }, [noteIndexBuffer]);
 
+  useEffect(() => {
+    localStorage.setItem("instrument", JSON.stringify(instrument));
+  }, [instrument]);
+
   if (isLoading) {
     return (
       <div className="app">
@@ -397,6 +404,8 @@ const App = () => {
         <Settings
           open={settingsOpen}
           setOpen={setSettingsOpen}
+          instrument={instrument}
+          setInstrument={setInstrument}
           showNoteName={showNoteName}
           setShowNoteName={setShowNoteName}
           changeNoteOnMistake={changeNoteOnMistake}
