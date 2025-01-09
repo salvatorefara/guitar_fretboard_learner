@@ -27,6 +27,7 @@ import {
   InstrumentNoteRangeIndex,
   InstrumentOctaveShift,
   MaxIndexBufferSize,
+  MaxTimeToCorrect,
   MicSensitivityIndex,
   MaxNoteImageIndex,
   MinNoteImageIndex,
@@ -296,7 +297,9 @@ const App = () => {
           noteIndexRange,
           getResisedNoteindexBuffer(),
           noteAccuracy,
+          noteTimeToCorrect,
           DrawNoteMinAccuracy,
+          MaxTimeToCorrect,
           DrawNoteMethod
         );
         updateNoteIndexBuffer(noteIndex);

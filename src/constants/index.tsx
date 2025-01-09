@@ -99,8 +99,9 @@ export const NoteStatsColorMap = [
 const HalfLifeEMA = 5;
 export const AlphaEMA = 1 - Math.exp(Math.log(0.5) / HalfLifeEMA);
 
-export const DrawNoteMethod = "accuracy-based";
+export const DrawNoteMethod = "time-based";
 export const DrawNoteMinAccuracy = 0.1;
+export const MaxTimeToCorrect = 10;
 
 export const MaxIndexBufferSize = 10;
 export const IndexBufferSizeFraction = 0.2;
