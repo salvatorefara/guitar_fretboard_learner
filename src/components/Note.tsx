@@ -1,6 +1,6 @@
 import Typography from "@mui/material/Typography";
 import { Note as NoteType } from "../types";
-import { NoteStatsColorMap } from "../constants";
+import { InstrumentOctaveShift, NoteStatsColorMap } from "../constants";
 import { noteToImage } from "../utils";
 
 interface NoteProps {
@@ -9,6 +9,7 @@ interface NoteProps {
   practiceState: string;
   showNoteName: boolean;
   isAnswerCorrect: boolean;
+  instrument: string;
 }
 
 export default function Note({
@@ -17,6 +18,7 @@ export default function Note({
   practiceState,
   showNoteName,
   isAnswerCorrect,
+  instrument,
 }: NoteProps) {
   const feedbackColor = isAnswerCorrect
     ? NoteStatsColorMap.slice(-1)
@@ -30,7 +32,7 @@ export default function Note({
         <img
           className="note-image"
           src={imagePath}
-          alt={noteToImage(currentNote)}
+          alt={noteToImage(currentNote, InstrumentOctaveShift[instrument])}
         />
         <div className="note-feedback">
           <Typography variant="h3" sx={{ color: feedbackColor }}>

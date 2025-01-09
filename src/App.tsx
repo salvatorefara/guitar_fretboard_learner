@@ -24,8 +24,12 @@ import {
   DrawNoteMethod,
   FeedbackDuration,
   IndexBufferSizeFraction,
+  InstrumentNoteRangeIndex,
+  InstrumentOctaveShift,
   MaxIndexBufferSize,
   MicSensitivityIndex,
+  MaxNoteImageIndex,
+  MinNoteImageIndex,
   MinPitchRMS,
   Notes,
   SampleRate,
@@ -35,6 +39,9 @@ import { Note as NoteType, PracticeState } from "./types";
 import "./styles/App.css";
 
 const App = () => {
+  const [instrument, setInstrument] = useState(
+    getLocalStorageItem("instrument", "guitar")
+  );
   const [noteAccuracy, setNoteAccuracy] = useState(
     getLocalStorageItem("noteAccuracy", initializeNoteAccuracy())
   );
@@ -60,7 +67,7 @@ const App = () => {
     getLocalStorageItem("changeNoteOnMistake", true)
   );
   const [noteIndexRange, setNoteIndexRange] = useState(
-    getLocalStorageItem("noteIndexRange", [0, Notes.length - 1])
+    getLocalStorageItem("noteIndexRange", InstrumentNoteRangeIndex[instrument])
   );
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
@@ -81,6 +88,7 @@ const App = () => {
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
   const previousPitchRMSRef = useRef(0);
   const imageCache = useRef<{ [key: string]: HTMLImageElement }>({});
+  const timeoutId = useRef<any | null>(null);
 
   const detectPitch = Pitchfinder.AMDF({
     sampleRate: SampleRate,
@@ -94,30 +102,38 @@ const App = () => {
     idleImage.src = src;
     imageCache.current[src] = idleImage;
 
-    const promises = Notes.map((note) => {
-      return new Promise<void>((resolve, reject) => {
-        const img = new Image();
-        const src = noteToImage(note);
-        img.src = src;
-        img.onload = () => resolve();
-        img.onerror = () => reject();
-        imageCache.current[src] = img;
-      });
-    });
+    const promises = Notes.slice(MinNoteImageIndex, MaxNoteImageIndex + 1).map(
+      (note) => {
+        return new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          const src = noteToImage(note);
+          img.src = src;
+          img.onload = () => resolve();
+          img.onerror = () => reject();
+          imageCache.current[src] = img;
+        });
+      }
+    );
     await Promise.all(promises);
     setIsLoading(false);
   };
 
   useEffect(() => {
     cacheImages();
-    console.log(noteAccuracy);
   }, []);
 
   const imagePath = useMemo(() => {
     if (["Idle", "Countdown"].includes(practiceState)) {
-      return imageCache.current[noteToImage(null)]?.src || "notes/the_lick.svg";
+      return (
+        imageCache.current[noteToImage(null, InstrumentOctaveShift[instrument])]
+          ?.src || "notes/the_lick.svg"
+      );
     } else if (currentNote) {
-      return imageCache.current[noteToImage(currentNote)]?.src || "";
+      return (
+        imageCache.current[
+          noteToImage(currentNote, InstrumentOctaveShift[instrument])
+        ]?.src || ""
+      );
     }
     return "";
   }, [practiceState, currentNote]);
@@ -136,6 +152,7 @@ const App = () => {
     } else {
       stopListening();
       setPracticeState("Idle");
+      clearTimeout(timeoutId.current);
     }
   };
 
@@ -269,7 +286,7 @@ const App = () => {
             setCorrect((correct) => correct + 1);
             updateNoteAccuracy(currentNote, 1);
             setPracticeState("Feedback");
-            setTimeout(() => {
+            timeoutId.current = setTimeout(() => {
               setPracticeState("New Note");
             }, FeedbackDuration);
           } else {
@@ -278,12 +295,12 @@ const App = () => {
             updateNoteAccuracy(currentNote, 0);
             if (changeNoteOnMistake) {
               setPracticeState("Feedback");
-              setTimeout(() => {
+              timeoutId.current = setTimeout(() => {
                 setPracticeState("New Note");
               }, FeedbackDuration);
             } else {
               setPracticeState("Feedback");
-              setTimeout(() => {
+              timeoutId.current = setTimeout(() => {
                 setPracticeState("Listening");
               }, FeedbackDuration);
             }
@@ -309,6 +326,7 @@ const App = () => {
   useEffect(() => {
     if (timer === 0) {
       setPracticeState("Idle");
+      clearTimeout(timeoutId.current);
     }
   }, [timer]);
 
@@ -356,6 +374,15 @@ const App = () => {
     localStorage.setItem("noteIndexBuffer", JSON.stringify(noteIndexBuffer));
   }, [noteIndexBuffer]);
 
+  useEffect(() => {
+    setPracticeState("Idle");
+    clearTimeout(timeoutId.current);
+    stopListening();
+    setNoteAccuracy(initializeNoteAccuracy());
+    setNoteIndexRange(InstrumentNoteRangeIndex[instrument]);
+    localStorage.setItem("instrument", JSON.stringify(instrument));
+  }, [instrument]);
+
   if (isLoading) {
     return (
       <div className="app">
@@ -381,6 +408,7 @@ const App = () => {
           practiceState={practiceState}
           showNoteName={showNoteName}
           isAnswerCorrect={isAnswerCorrect}
+          instrument={instrument}
         />
         <Clock
           practiceState={practiceState}
@@ -397,6 +425,8 @@ const App = () => {
         <Settings
           open={settingsOpen}
           setOpen={setSettingsOpen}
+          instrument={instrument}
+          setInstrument={setInstrument}
           showNoteName={showNoteName}
           setShowNoteName={setShowNoteName}
           changeNoteOnMistake={changeNoteOnMistake}
@@ -415,6 +445,7 @@ const App = () => {
           setOpen={setStatisticsOpen}
           noteAccuracy={noteAccuracy}
           setNoteAccuracy={setNoteAccuracy}
+          instrument={instrument}
         />
       </div>
     );

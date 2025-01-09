@@ -12,6 +12,7 @@ interface StatisticsProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
   noteAccuracy: Record<string, number | null>;
   setNoteAccuracy: Dispatch<SetStateAction<Record<string, number | null>>>;
+  instrument: string;
 }
 
 const style = {
@@ -32,6 +33,7 @@ export default function Statistics({
   setOpen,
   noteAccuracy,
   setNoteAccuracy,
+  instrument,
 }: StatisticsProps) {
   const handleClose = () => setOpen(false);
 
@@ -51,7 +53,7 @@ export default function Statistics({
           <Typography variant="h5" sx={{ color: "black" }}>
             Statistics
           </Typography>
-          <NoteStats noteAccuracy={noteAccuracy} />
+          <NoteStats noteAccuracy={noteAccuracy} instrument={instrument} />
           <Legend />
           <Button
             className="button"
