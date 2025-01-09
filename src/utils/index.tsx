@@ -82,7 +82,7 @@ export function transpose(noteName: string, shift: number): string {
   return `${namePrefix}${shift + octave}`;
 }
 
-export function noteToImage(note: Note | null, shift: number = 1): string {
+export function noteToImage(note: Note | null, shift: number = 0): string {
   return note
     ? `notes/${transpose(noteToName(note), shift)}.svg`
     : "notes/the_lick.svg";

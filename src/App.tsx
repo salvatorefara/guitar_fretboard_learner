@@ -27,6 +27,8 @@ import {
   InstrumentOctaveShift,
   MaxIndexBufferSize,
   MicSensitivityIndex,
+  MaxNoteImageIndex,
+  MinNoteImageIndex,
   MinPitchRMS,
   Notes,
   SampleRate,
@@ -98,16 +100,18 @@ const App = () => {
     idleImage.src = src;
     imageCache.current[src] = idleImage;
 
-    const promises = Notes.map((note) => {
-      return new Promise<void>((resolve, reject) => {
-        const img = new Image();
-        const src = noteToImage(note);
-        img.src = src;
-        img.onload = () => resolve();
-        img.onerror = () => reject();
-        imageCache.current[src] = img;
-      });
-    });
+    const promises = Notes.slice(MinNoteImageIndex, MaxNoteImageIndex + 1).map(
+      (note) => {
+        return new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          const src = noteToImage(note);
+          img.src = src;
+          img.onload = () => resolve();
+          img.onerror = () => reject();
+          imageCache.current[src] = img;
+        });
+      }
+    );
     await Promise.all(promises);
     setIsLoading(false);
   };
