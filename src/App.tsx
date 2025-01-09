@@ -359,6 +359,7 @@ const App = () => {
 
   useEffect(() => {
     if (timer === 0) {
+      stopListening();
       setPracticeState("Idle");
       clearTimeout(timeoutId.current);
     }
@@ -416,12 +417,14 @@ const App = () => {
   }, [noteIndexBuffer]);
 
   useEffect(() => {
-    setPracticeState("Idle");
-    clearTimeout(timeoutId.current);
-    stopListening();
-    setNoteAccuracy(initializeNoteStats());
-    setNoteIndexRange(InstrumentNoteRangeIndex[instrument]);
-    localStorage.setItem("instrument", JSON.stringify(instrument));
+    if (settingsOpen) {
+      stopListening();
+      setPracticeState("Idle");
+      clearTimeout(timeoutId.current);
+      setNoteAccuracy(initializeNoteStats());
+      setNoteIndexRange(InstrumentNoteRangeIndex[instrument]);
+      localStorage.setItem("instrument", JSON.stringify(instrument));
+    }
   }, [instrument]);
 
   if (isLoading) {

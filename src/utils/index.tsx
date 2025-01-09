@@ -43,9 +43,6 @@ export function drawNote(
       });
       const indexesSelected = indexes.filter((index) => isIndexValid(index));
       const notesSelected = Notes.filter((_, index) => isIndexValid(index));
-      // const indexes = notes.map((_, index) => {
-      //   return index;
-      // });
       const weights = notesSelected.map((note, _) => {
         const noteName = noteToName(note);
         let accuracy = accuracies[noteName];
