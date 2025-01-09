@@ -36,6 +36,10 @@ export const MinPitchRMS = [
 export const CountdownTime = 3;
 export const TimerTime = 180;
 export const TimerTimes = [
+  // {
+  //   value: 1,
+  //   label: "1 second",
+  // },
   {
     value: 60,
     label: "1 minute",

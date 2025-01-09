@@ -88,6 +88,7 @@ const App = () => {
   const workletNodeRef = useRef<AudioWorkletNode | null>(null);
   const previousPitchRMSRef = useRef(0);
   const imageCache = useRef<{ [key: string]: HTMLImageElement }>({});
+  const timeoutId = useRef<any | null>(null);
 
   const detectPitch = Pitchfinder.AMDF({
     sampleRate: SampleRate,
@@ -151,6 +152,7 @@ const App = () => {
     } else {
       stopListening();
       setPracticeState("Idle");
+      clearTimeout(timeoutId.current);
     }
   };
 
@@ -284,7 +286,7 @@ const App = () => {
             setCorrect((correct) => correct + 1);
             updateNoteAccuracy(currentNote, 1);
             setPracticeState("Feedback");
-            setTimeout(() => {
+            timeoutId.current = setTimeout(() => {
               setPracticeState("New Note");
             }, FeedbackDuration);
           } else {
@@ -293,12 +295,12 @@ const App = () => {
             updateNoteAccuracy(currentNote, 0);
             if (changeNoteOnMistake) {
               setPracticeState("Feedback");
-              setTimeout(() => {
+              timeoutId.current = setTimeout(() => {
                 setPracticeState("New Note");
               }, FeedbackDuration);
             } else {
               setPracticeState("Feedback");
-              setTimeout(() => {
+              timeoutId.current = setTimeout(() => {
                 setPracticeState("Listening");
               }, FeedbackDuration);
             }
@@ -324,6 +326,7 @@ const App = () => {
   useEffect(() => {
     if (timer === 0) {
       setPracticeState("Idle");
+      clearTimeout(timeoutId.current);
     }
   }, [timer]);
 
@@ -373,6 +376,7 @@ const App = () => {
 
   useEffect(() => {
     setPracticeState("Idle");
+    clearTimeout(timeoutId.current);
     stopListening();
     setNoteAccuracy(initializeNoteAccuracy());
     setNoteIndexRange(InstrumentNoteRangeIndex[instrument]);
