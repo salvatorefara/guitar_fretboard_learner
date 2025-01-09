@@ -13,7 +13,7 @@ import {
   drawNote,
   getLocalStorageItem,
   getNote,
-  initializeNoteAccuracy,
+  initializeNoteStats,
   noteToName,
   noteToImage,
 } from "./utils";
@@ -43,8 +43,14 @@ const App = () => {
     getLocalStorageItem("instrument", "guitar")
   );
   const [noteAccuracy, setNoteAccuracy] = useState(
-    getLocalStorageItem("noteAccuracy", initializeNoteAccuracy())
+    getLocalStorageItem("noteAccuracy", initializeNoteStats())
   );
+  const [noteAverageTimeToCorrect, setNoteAverageTimeToCorrect] = useState(
+    getLocalStorageItem("noteAverageTimeToCorrect", initializeNoteStats())
+  );
+  const [averageTimeToCorrect, setAverageTimeToCorrect] = useState<
+    number | null
+  >(null);
   const [useClock, setUseClock] = useState(
     getLocalStorageItem("useClock", true)
   );
@@ -89,6 +95,7 @@ const App = () => {
   const previousPitchRMSRef = useRef(0);
   const imageCache = useRef<{ [key: string]: HTMLImageElement }>({});
   const timeoutId = useRef<any | null>(null);
+  const noteTime = useRef(0);
 
   const detectPitch = Pitchfinder.AMDF({
     sampleRate: SampleRate,
@@ -149,6 +156,7 @@ const App = () => {
       }
       setCorrect(0);
       setIncorrect(0);
+      setAverageTimeToCorrect(null);
     } else {
       stopListening();
       setPracticeState("Idle");
@@ -235,6 +243,16 @@ const App = () => {
     }
   };
 
+  const updateAverageTimeToCorrect = (update: number) => {
+    if (averageTimeToCorrect === null) {
+      setAverageTimeToCorrect(update);
+    } else {
+      setAverageTimeToCorrect(
+        averageTimeToCorrect + (update - averageTimeToCorrect) / correct
+      );
+    }
+  };
+
   const updateNoteIndexBuffer = (index: number) => {
     const newNoteIndexBuffer = [
       ...noteIndexBuffer.slice(-MaxIndexBufferSize),
@@ -273,6 +291,7 @@ const App = () => {
         updateNoteIndexBuffer(noteIndex);
         setCurrentNote(randomNote);
         setPracticeState("Listening");
+        noteTime.current = Date.now();
         break;
       case "Listening":
         if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
@@ -282,6 +301,9 @@ const App = () => {
             currentNote?.name == detectedNote?.name &&
             currentNote?.octave == detectedNote?.octave
           ) {
+            const noteTimeToCorrect = (Date.now() - noteTime.current) / 1000;
+            console.log("Note time:", noteTimeToCorrect);
+            updateAverageTimeToCorrect(noteTimeToCorrect);
             setIsAnswerCorrect(true);
             setCorrect((correct) => correct + 1);
             updateNoteAccuracy(currentNote, 1);
@@ -378,7 +400,7 @@ const App = () => {
     setPracticeState("Idle");
     clearTimeout(timeoutId.current);
     stopListening();
-    setNoteAccuracy(initializeNoteAccuracy());
+    setNoteAccuracy(initializeNoteStats());
     setNoteIndexRange(InstrumentNoteRangeIndex[instrument]);
     localStorage.setItem("instrument", JSON.stringify(instrument));
   }, [instrument]);
@@ -418,7 +440,11 @@ const App = () => {
           countdown={countdown}
           setCountdown={setCountdown}
         />
-        <Score correct={correct} incorrect={incorrect} />
+        <Score
+          correct={correct}
+          incorrect={incorrect}
+          averageTimeToCorrect={averageTimeToCorrect}
+        />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
         </Button>

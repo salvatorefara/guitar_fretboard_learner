@@ -1,7 +1,7 @@
 .app {
   position: absolute;
   display: grid;
-  grid-template-rows: 70px 300px 100px 140px 100px;
+  grid-template-rows: 70px 300px 100px 120px 100px;
   top: 0;
   left: 0;
   width: 100vw;
@@ -63,6 +63,6 @@
   left: 50%;
   transform: translate(-50%);
   display: grid;
-  grid-template-columns: 33% 33% 33%;
-  max-width: 400px;
+  grid-template-columns: 25% 25% 25% 25%;
+  width: 440px;
 }

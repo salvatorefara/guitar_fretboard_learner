@@ -5,7 +5,7 @@ import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import Legend from "./Legend";
 import NoteStats from "./NoteStats";
-import { initializeNoteAccuracy } from "../utils";
+import { initializeNoteStats } from "../utils";
 
 interface StatisticsProps {
   open: boolean;
@@ -38,7 +38,7 @@ export default function Statistics({
   const handleClose = () => setOpen(false);
 
   const resetNoteAccuracy = () => {
-    setNoteAccuracy(initializeNoteAccuracy());
+    setNoteAccuracy(initializeNoteStats());
   };
 
   return (

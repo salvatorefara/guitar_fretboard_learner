@@ -88,7 +88,7 @@ export function noteToImage(note: Note | null, shift: number = 0): string {
     : "notes/the_lick.svg";
 }
 
-export function initializeNoteAccuracy() {
+export function initializeNoteStats() {
   return Notes.reduce((acc: any, note) => {
     acc[noteToName(note)] = null;
     return acc;
