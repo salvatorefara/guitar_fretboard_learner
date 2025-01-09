@@ -45,8 +45,8 @@ const App = () => {
   const [noteAccuracy, setNoteAccuracy] = useState(
     getLocalStorageItem("noteAccuracy", initializeNoteStats())
   );
-  const [noteAverageTimeToCorrect, setNoteAverageTimeToCorrect] = useState(
-    getLocalStorageItem("noteAverageTimeToCorrect", initializeNoteStats())
+  const [noteTimeToCorrect, setNoteTimeToCorrect] = useState(
+    getLocalStorageItem("noteTimeToCorrect", initializeNoteStats())
   );
   const [averageTimeToCorrect, setAverageTimeToCorrect] = useState<
     number | null
@@ -232,14 +232,25 @@ const App = () => {
     }
   };
 
-  const updateNoteAccuracy = (note: NoteType | null, update: number) => {
-    if (note) {
-      const noteName = noteToName(note);
+  const updateNoteAccuracy = (update: number) => {
+    if (currentNote) {
+      const noteName = noteToName(currentNote);
       var NewNoteAccuracy = { ...noteAccuracy };
       NewNoteAccuracy[noteName] = NewNoteAccuracy[noteName]
         ? AlphaEMA * update + (1 - AlphaEMA) * NewNoteAccuracy[noteName]
         : update;
       setNoteAccuracy(NewNoteAccuracy);
+    }
+  };
+
+  const updateNoteTimeToCorrect = (update: number) => {
+    if (currentNote) {
+      const noteName = noteToName(currentNote);
+      var newNoteTimeToCorrect = { ...noteTimeToCorrect };
+      newNoteTimeToCorrect[noteName] = newNoteTimeToCorrect[noteName]
+        ? AlphaEMA * update + (1 - AlphaEMA) * newNoteTimeToCorrect[noteName]
+        : update;
+      setNoteTimeToCorrect(newNoteTimeToCorrect);
     }
   };
 
@@ -304,9 +315,10 @@ const App = () => {
             const noteTimeToCorrect = (Date.now() - noteTime.current) / 1000;
             console.log("Note time:", noteTimeToCorrect);
             updateAverageTimeToCorrect(noteTimeToCorrect);
+            updateNoteTimeToCorrect(noteTimeToCorrect);
             setIsAnswerCorrect(true);
             setCorrect((correct) => correct + 1);
-            updateNoteAccuracy(currentNote, 1);
+            updateNoteAccuracy(1);
             setPracticeState("Feedback");
             timeoutId.current = setTimeout(() => {
               setPracticeState("New Note");
@@ -314,7 +326,7 @@ const App = () => {
           } else {
             setIsAnswerCorrect(false);
             setIncorrect((incorrect) => incorrect + 1);
-            updateNoteAccuracy(currentNote, 0);
+            updateNoteAccuracy(0);
             if (changeNoteOnMistake) {
               setPracticeState("Feedback");
               timeoutId.current = setTimeout(() => {
@@ -391,6 +403,13 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
   }, [noteAccuracy]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "noteTimeToCorrect",
+      JSON.stringify(noteTimeToCorrect)
+    );
+  }, [noteTimeToCorrect]);
 
   useEffect(() => {
     localStorage.setItem("noteIndexBuffer", JSON.stringify(noteIndexBuffer));
