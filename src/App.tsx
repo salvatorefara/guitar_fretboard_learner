@@ -24,6 +24,7 @@ import {
   DrawNoteMethod,
   FeedbackDuration,
   IndexBufferSizeFraction,
+  InstrumentNoteRangeIndex,
   InstrumentOctaveShift,
   MaxIndexBufferSize,
   MicSensitivityIndex,
@@ -66,7 +67,7 @@ const App = () => {
     getLocalStorageItem("changeNoteOnMistake", true)
   );
   const [noteIndexRange, setNoteIndexRange] = useState(
-    getLocalStorageItem("noteIndexRange", [0, Notes.length - 1])
+    getLocalStorageItem("noteIndexRange", InstrumentNoteRangeIndex[instrument])
   );
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
@@ -374,6 +375,7 @@ const App = () => {
     setPracticeState("Idle");
     stopListening();
     setNoteAccuracy(initializeNoteAccuracy());
+    setNoteIndexRange(InstrumentNoteRangeIndex[instrument]);
     localStorage.setItem("instrument", JSON.stringify(instrument));
   }, [instrument]);
 

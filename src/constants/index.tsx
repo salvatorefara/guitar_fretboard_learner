@@ -74,6 +74,11 @@ export const InstrumentOctaveShift: { [key: string]: number } = {
   piano: 0,
 };
 
+export const InstrumentNoteRangeIndex: { [key: string]: number[] } = {
+  guitar: [28, 72], // E2 - C6
+  piano: [40, 84], // E3 - C7
+};
+
 export const NoteStatsColorMap = [
   "#8e0152",
   "#c51b7d",

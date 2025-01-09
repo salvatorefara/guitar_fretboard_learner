@@ -10,6 +10,7 @@ import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import {
   Instruments,
+  InstrumentNoteRangeIndex,
   MinNoteRange,
   MinPitchRMS,
   Notes,
@@ -231,8 +232,8 @@ export default function Settings({
             <Grid size={6}>
               <IOSSlider
                 getAriaLabel={getNoteName}
-                min={0}
-                max={Notes.length - 1}
+                min={InstrumentNoteRangeIndex[instrument][0]}
+                max={InstrumentNoteRangeIndex[instrument][1]}
                 step={1}
                 valueLabelDisplay="on"
                 value={noteIndexRange}
