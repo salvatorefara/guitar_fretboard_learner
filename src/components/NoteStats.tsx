@@ -2,7 +2,7 @@ import { InstrumentOctaveShift } from "../constants";
 import { getColor, transpose } from "../utils";
 
 interface NoteStatsProps {
-  noteAccuracy: Record<string, number | null>;
+  noteStats: Record<string, number | null>;
   instrument: string;
 }
 
@@ -390,10 +390,7 @@ const NoteBodies = [
   },
 ];
 
-export default function NoteStats({
-  noteAccuracy,
-  instrument,
-}: NoteStatsProps) {
+export default function NoteStats({ noteStats, instrument }: NoteStatsProps) {
   return (
     <div>
       <svg width="850.392px" height="297.638px" viewBox="0 0 850.392 297.638">
@@ -464,7 +461,7 @@ export default function NoteStats({
             key={index}
             className={accidental.className}
             fill={getColor(
-              noteAccuracy[
+              noteStats[
                 transpose(
                   accidental.className,
                   -InstrumentOctaveShift[instrument]
@@ -968,7 +965,7 @@ export default function NoteStats({
             key={index}
             className={note.className}
             fill={getColor(
-              noteAccuracy[
+              noteStats[
                 transpose(note.className, -InstrumentOctaveShift[instrument])
               ]
             )}

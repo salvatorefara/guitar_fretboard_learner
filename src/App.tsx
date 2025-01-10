@@ -13,7 +13,7 @@ import {
   drawNote,
   getLocalStorageItem,
   getNote,
-  initializeNoteAccuracy,
+  initializeNoteStats,
   noteToName,
   noteToImage,
 } from "./utils";
@@ -27,6 +27,7 @@ import {
   InstrumentNoteRangeIndex,
   InstrumentOctaveShift,
   MaxIndexBufferSize,
+  MaxTimeToCorrect,
   MicSensitivityIndex,
   MaxNoteImageIndex,
   MinNoteImageIndex,
@@ -43,8 +44,14 @@ const App = () => {
     getLocalStorageItem("instrument", "guitar")
   );
   const [noteAccuracy, setNoteAccuracy] = useState(
-    getLocalStorageItem("noteAccuracy", initializeNoteAccuracy())
+    getLocalStorageItem("noteAccuracy", initializeNoteStats())
   );
+  const [noteTimeToCorrect, setNoteTimeToCorrect] = useState(
+    getLocalStorageItem("noteTimeToCorrect", initializeNoteStats())
+  );
+  const [averageTimeToCorrect, setAverageTimeToCorrect] = useState<
+    number | null
+  >(null);
   const [useClock, setUseClock] = useState(
     getLocalStorageItem("useClock", true)
   );
@@ -89,6 +96,7 @@ const App = () => {
   const previousPitchRMSRef = useRef(0);
   const imageCache = useRef<{ [key: string]: HTMLImageElement }>({});
   const timeoutId = useRef<any | null>(null);
+  const noteTime = useRef(0);
 
   const detectPitch = Pitchfinder.AMDF({
     sampleRate: SampleRate,
@@ -149,6 +157,7 @@ const App = () => {
       }
       setCorrect(0);
       setIncorrect(0);
+      setAverageTimeToCorrect(null);
     } else {
       stopListening();
       setPracticeState("Idle");
@@ -224,14 +233,35 @@ const App = () => {
     }
   };
 
-  const updateNoteAccuracy = (note: NoteType | null, update: number) => {
-    if (note) {
-      const noteName = noteToName(note);
+  const updateNoteAccuracy = (update: number) => {
+    if (currentNote) {
+      const noteName = noteToName(currentNote);
       var NewNoteAccuracy = { ...noteAccuracy };
       NewNoteAccuracy[noteName] = NewNoteAccuracy[noteName]
         ? AlphaEMA * update + (1 - AlphaEMA) * NewNoteAccuracy[noteName]
         : update;
       setNoteAccuracy(NewNoteAccuracy);
+    }
+  };
+
+  const updateNoteTimeToCorrect = (update: number) => {
+    if (currentNote) {
+      const noteName = noteToName(currentNote);
+      var newNoteTimeToCorrect = { ...noteTimeToCorrect };
+      newNoteTimeToCorrect[noteName] = newNoteTimeToCorrect[noteName]
+        ? AlphaEMA * update + (1 - AlphaEMA) * newNoteTimeToCorrect[noteName]
+        : update;
+      setNoteTimeToCorrect(newNoteTimeToCorrect);
+    }
+  };
+
+  const updateAverageTimeToCorrect = (update: number) => {
+    if (averageTimeToCorrect === null) {
+      setAverageTimeToCorrect(update);
+    } else {
+      setAverageTimeToCorrect(
+        averageTimeToCorrect + (update - averageTimeToCorrect) / correct
+      );
     }
   };
 
@@ -267,12 +297,15 @@ const App = () => {
           noteIndexRange,
           getResisedNoteindexBuffer(),
           noteAccuracy,
+          noteTimeToCorrect,
           DrawNoteMinAccuracy,
+          MaxTimeToCorrect,
           DrawNoteMethod
         );
         updateNoteIndexBuffer(noteIndex);
         setCurrentNote(randomNote);
         setPracticeState("Listening");
+        noteTime.current = Date.now();
         break;
       case "Listening":
         if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
@@ -282,9 +315,13 @@ const App = () => {
             currentNote?.name == detectedNote?.name &&
             currentNote?.octave == detectedNote?.octave
           ) {
+            const noteTimeToCorrect = (Date.now() - noteTime.current) / 1000;
+            console.log("Note time:", noteTimeToCorrect);
+            updateAverageTimeToCorrect(noteTimeToCorrect);
+            updateNoteTimeToCorrect(noteTimeToCorrect);
             setIsAnswerCorrect(true);
             setCorrect((correct) => correct + 1);
-            updateNoteAccuracy(currentNote, 1);
+            updateNoteAccuracy(1);
             setPracticeState("Feedback");
             timeoutId.current = setTimeout(() => {
               setPracticeState("New Note");
@@ -292,7 +329,7 @@ const App = () => {
           } else {
             setIsAnswerCorrect(false);
             setIncorrect((incorrect) => incorrect + 1);
-            updateNoteAccuracy(currentNote, 0);
+            updateNoteAccuracy(0);
             if (changeNoteOnMistake) {
               setPracticeState("Feedback");
               timeoutId.current = setTimeout(() => {
@@ -325,6 +362,7 @@ const App = () => {
 
   useEffect(() => {
     if (timer === 0) {
+      stopListening();
       setPracticeState("Idle");
       clearTimeout(timeoutId.current);
     }
@@ -371,16 +409,25 @@ const App = () => {
   }, [noteAccuracy]);
 
   useEffect(() => {
+    localStorage.setItem(
+      "noteTimeToCorrect",
+      JSON.stringify(noteTimeToCorrect)
+    );
+  }, [noteTimeToCorrect]);
+
+  useEffect(() => {
     localStorage.setItem("noteIndexBuffer", JSON.stringify(noteIndexBuffer));
   }, [noteIndexBuffer]);
 
   useEffect(() => {
-    setPracticeState("Idle");
-    clearTimeout(timeoutId.current);
-    stopListening();
-    setNoteAccuracy(initializeNoteAccuracy());
-    setNoteIndexRange(InstrumentNoteRangeIndex[instrument]);
-    localStorage.setItem("instrument", JSON.stringify(instrument));
+    if (settingsOpen) {
+      stopListening();
+      setPracticeState("Idle");
+      clearTimeout(timeoutId.current);
+      setNoteAccuracy(initializeNoteStats());
+      setNoteIndexRange(InstrumentNoteRangeIndex[instrument]);
+      localStorage.setItem("instrument", JSON.stringify(instrument));
+    }
   }, [instrument]);
 
   if (isLoading) {
@@ -418,7 +465,11 @@ const App = () => {
           countdown={countdown}
           setCountdown={setCountdown}
         />
-        <Score correct={correct} incorrect={incorrect} />
+        <Score
+          correct={correct}
+          incorrect={incorrect}
+          averageTimeToCorrect={averageTimeToCorrect}
+        />
         <Button className="button" variant="contained" onClick={handlePractice}>
           {practiceState == "Idle" ? "Start Practice" : "Stop Practice"}
         </Button>
@@ -445,6 +496,8 @@ const App = () => {
           setOpen={setStatisticsOpen}
           noteAccuracy={noteAccuracy}
           setNoteAccuracy={setNoteAccuracy}
+          noteTimeToCorrect={noteTimeToCorrect}
+          setNoteTimeToCorrect={setNoteTimeToCorrect}
           instrument={instrument}
         />
       </div>

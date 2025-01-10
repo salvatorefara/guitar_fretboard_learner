@@ -20,55 +20,59 @@ export function drawNote(
   noteIndexRange: number[],
   excludeIndexes: number[] = [],
   accuracies: Record<string, number> = {},
+  times: Record<string, number> = {},
   minAccuracy: number = 0.1,
-  method: "random" | "accuracy-based" = "random"
+  maxTime: number = 10,
+  method: "random" | "accuracy-based" | "time-based" = "random"
 ): [Note, number] {
-  switch (method) {
-    case "random":
-      const noteIndex = Math.round(
-        noteIndexRange[0] +
-          Math.random() * (noteIndexRange[1] - noteIndexRange[0])
+  if (method === "random") {
+    const noteIndex = Math.round(
+      noteIndexRange[0] +
+        Math.random() * (noteIndexRange[1] - noteIndexRange[0])
+    );
+    return [Notes[noteIndex], noteIndex];
+  } else {
+    const isIndexValid = (index: number): boolean => {
+      return (
+        noteIndexRange[0] <= index &&
+        index <= noteIndexRange[1] &&
+        !excludeIndexes.includes(index)
       );
-      return [Notes[noteIndex], noteIndex];
-    case "accuracy-based":
-      const isIndexValid = (index: number): boolean => {
-        return (
-          noteIndexRange[0] <= index &&
-          index <= noteIndexRange[1] &&
-          !excludeIndexes.includes(index)
-        );
-      };
-      const indexes = Notes.map((_, index) => {
-        return index;
-      });
-      const indexesSelected = indexes.filter((index) => isIndexValid(index));
-      const notesSelected = Notes.filter((_, index) => isIndexValid(index));
-      // const indexes = notes.map((_, index) => {
-      //   return index;
-      // });
-      const weights = notesSelected.map((note, _) => {
-        const noteName = noteToName(note);
-        let accuracy = accuracies[noteName];
-        accuracy = accuracy ? Math.max(accuracy, minAccuracy) : minAccuracy;
-        return 1 / accuracy;
-      });
-      const weightsSum = weights.reduce((sum, w) => sum + w, 0);
-      const probabilities = weights.map((w) => w / weightsSum);
-      const cumulativeDistribution: number[] = [];
-      probabilities.reduce((sum, p, index) => {
-        cumulativeDistribution[index] = sum + p;
-        return sum + p;
-      }, 0);
+    };
+    const indexes = Notes.map((_, index) => {
+      return index;
+    });
+    const indexesSelected = indexes.filter((index) => isIndexValid(index));
+    const notesSelected = Notes.filter((_, index) => isIndexValid(index));
 
-      const randomValue = Math.random();
-      const selectIndex = cumulativeDistribution.findIndex(
-        (cumulativeProb) => randomValue < cumulativeProb
-      );
+    const weights =
+      method === "accuracy-based"
+        ? notesSelected.map((note, _) => {
+            const noteName = noteToName(note);
+            let accuracy = accuracies[noteName];
+            accuracy = accuracy ? Math.max(accuracy, minAccuracy) : minAccuracy;
+            return 1 / accuracy;
+          })
+        : notesSelected.map((note, _) => {
+            const noteName = noteToName(note);
+            const timeToCorrect = times[noteName];
+            return timeToCorrect ? Math.min(timeToCorrect, maxTime) : maxTime;
+          });
 
-      return [
-        Notes[indexesSelected[selectIndex]],
-        indexesSelected[selectIndex],
-      ];
+    const weightsSum = weights.reduce((sum, w) => sum + w, 0);
+    const probabilities = weights.map((w) => w / weightsSum);
+    const cumulativeDistribution: number[] = [];
+    probabilities.reduce((sum, p, index) => {
+      cumulativeDistribution[index] = sum + p;
+      return sum + p;
+    }, 0);
+
+    const randomValue = Math.random();
+    const selectIndex = cumulativeDistribution.findIndex(
+      (cumulativeProb) => randomValue < cumulativeProb
+    );
+
+    return [Notes[indexesSelected[selectIndex]], indexesSelected[selectIndex]];
   }
 }
 
@@ -88,7 +92,7 @@ export function noteToImage(note: Note | null, shift: number = 0): string {
     : "notes/the_lick.svg";
 }
 
-export function initializeNoteAccuracy() {
+export function initializeNoteStats() {
   return Notes.reduce((acc: any, note) => {
     acc[noteToName(note)] = null;
     return acc;
