@@ -496,6 +496,8 @@ const App = () => {
           setOpen={setStatisticsOpen}
           noteAccuracy={noteAccuracy}
           setNoteAccuracy={setNoteAccuracy}
+          noteTimeToCorrect={noteTimeToCorrect}
+          setNoteTimeToCorrect={setNoteTimeToCorrect}
           instrument={instrument}
         />
       </div>
