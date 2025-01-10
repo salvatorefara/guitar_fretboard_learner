@@ -103,6 +103,9 @@ export const DrawNoteMethod = "time-based";
 export const DrawNoteMinAccuracy = 0.1;
 export const MaxTimeToCorrect = 10;
 
+export const MinTimeToCorrectStats = 0;
+export const MaxTimeToCorrectStats = 5;
+
 export const MaxIndexBufferSize = 10;
 export const IndexBufferSizeFraction = 0.2;
 

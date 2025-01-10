@@ -1,11 +1,11 @@
 import Typography from "@mui/material/Typography";
 import { NoteStatsColorMap } from "../constants";
 
-export default function Legend() {
-  const labels = NoteStatsColorMap.map((_, index) =>
-    ((100 * index) / (NoteStatsColorMap.length - 1)).toFixed(0)
-  );
+interface LegendProps {
+  labels: string[];
+}
 
+export default function Legend({ labels }: LegendProps) {
   return (
     <div
       style={{

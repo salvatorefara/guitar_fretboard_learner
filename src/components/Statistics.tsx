@@ -5,6 +5,7 @@ import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 import Legend from "./Legend";
 import NoteStats from "./NoteStats";
+import { NoteStatsColorMap } from "../constants";
 import { initializeNoteStats } from "../utils";
 
 interface StatisticsProps {
@@ -42,6 +43,10 @@ export default function Statistics({
     setNoteAccuracy(initializeNoteStats());
   };
 
+  const labels = NoteStatsColorMap.map((_, index) =>
+    ((100 * index) / (NoteStatsColorMap.length - 1)).toFixed(0)
+  );
+
   return (
     <div>
       <Modal
@@ -54,8 +59,8 @@ export default function Statistics({
           <Typography variant="h5" sx={{ color: "black" }}>
             Statistics
           </Typography>
-          <NoteStats noteAccuracy={noteAccuracy} instrument={instrument} />
-          <Legend />
+          <NoteStats noteStats={noteAccuracy} instrument={instrument} />
+          <Legend labels={labels} />
           <Button
             className="button"
             variant="contained"
