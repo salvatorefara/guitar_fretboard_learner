@@ -60,6 +60,7 @@ export default function Statistics({
             className="button"
             variant="contained"
             onClick={resetNoteAccuracy}
+            sx={{ mb: 4 }}
           >
             Reset
           </Button>
