@@ -43,9 +43,10 @@ export default function Statistics({
     setNoteAccuracy(initializeNoteStats());
   };
 
-  const labels = NoteStatsColorMap.map((_, index) =>
+  const colorLabels = NoteStatsColorMap.map((_, index) =>
     ((100 * index) / (NoteStatsColorMap.length - 1)).toFixed(0)
   );
+  const label = "Accuracy (%)";
 
   return (
     <div>
@@ -60,7 +61,7 @@ export default function Statistics({
             Statistics
           </Typography>
           <NoteStats noteStats={noteAccuracy} instrument={instrument} />
-          <Legend labels={labels} />
+          <Legend colorLabels={colorLabels} label={label} />
           <Button
             className="button"
             variant="contained"

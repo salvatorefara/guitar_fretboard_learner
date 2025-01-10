@@ -2,10 +2,11 @@ import Typography from "@mui/material/Typography";
 import { NoteStatsColorMap } from "../constants";
 
 interface LegendProps {
-  labels: string[];
+  colorLabels: string[];
+  label: string;
 }
 
-export default function Legend({ labels }: LegendProps) {
+export default function Legend({ colorLabels, label }: LegendProps) {
   return (
     <div
       style={{
@@ -26,11 +27,13 @@ export default function Legend({ labels }: LegendProps) {
                 marginBottom: "5px",
               }}
             />
-            <Typography sx={{ color: "black" }}>{labels[index]}</Typography>
+            <Typography sx={{ color: "black" }}>
+              {colorLabels[index]}
+            </Typography>
           </div>
         ))}
       </div>
-      <Typography sx={{ color: "black" }}>Accuracy (%)</Typography>
+      <Typography sx={{ color: "black" }}>{label}</Typography>
     </div>
   );
 }
