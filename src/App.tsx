@@ -101,7 +101,7 @@ const App = () => {
   const detectPitch = Pitchfinder.AMDF({
     sampleRate: SampleRate,
     minFrequency: 70,
-    maxFrequency: 1500,
+    maxFrequency: 2100,
   });
 
   const cacheImages = async (): Promise<void> => {
