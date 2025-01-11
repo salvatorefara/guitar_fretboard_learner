@@ -17,6 +17,21 @@ export const NoteNames = [
   "B",
 ];
 
+export const EnharmonicNames: { [key: string]: string[] } = {
+  C: ["C", "B#"],
+  "C#": ["C#", "Db"],
+  D: ["D"],
+  "D#": ["D#", "Eb"],
+  E: ["E", "Fb"],
+  F: ["F", "E#"],
+  "F#": ["F#", "Gb"],
+  G: ["G"],
+  "G#": ["G#", "Ab"],
+  A: ["A"],
+  "A#": ["A#", "Bb"],
+  B: ["B", "Cb"],
+};
+
 const Octaves = Array.from({ length: 9 }, (_, i) => i);
 
 export const Notes: Note[] = Octaves.flatMap((octave) =>
