@@ -10,6 +10,7 @@ import Settings from "./components/Settings";
 import Statistics from "./components/Statistics";
 import {
   calculateRMS,
+  drawEnharmonicNote,
   drawNote,
   getLocalStorageItem,
   getNote,
@@ -79,6 +80,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<NoteType | null>(null);
+  const [enharmonicNote, setEnharmonicNote] = useState<NoteType | null>(null);
   const [detectedNote, setDetectedNote] = useState<NoteType | null>(null);
   const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>(
     getLocalStorageItem("noteIndexBuffer", [])
@@ -302,6 +304,11 @@ const App = () => {
           MaxTimeToCorrect,
           DrawNoteMethod
         );
+        const enharmonicNoteName = drawEnharmonicNote(randomNote.name);
+        setEnharmonicNote({
+          name: enharmonicNoteName,
+          octave: randomNote.octave,
+        });
         updateNoteIndexBuffer(noteIndex);
         setCurrentNote(randomNote);
         setPracticeState("Listening");
@@ -403,6 +410,13 @@ const App = () => {
   useEffect(() => {
     console.log("Current note:", currentNote ? noteToName(currentNote) : null);
   }, [currentNote]);
+
+  useEffect(() => {
+    console.log(
+      "Enharmonic note:",
+      enharmonicNote ? noteToName(enharmonicNote) : null
+    );
+  }, [enharmonicNote]);
 
   useEffect(() => {
     localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));

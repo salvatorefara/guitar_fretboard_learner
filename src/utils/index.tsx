@@ -1,4 +1,10 @@
-import { C0, NoteNames, Notes, NoteStatsColorMap } from "../constants";
+import {
+  C0,
+  EnharmonicNames,
+  NoteNames,
+  Notes,
+  NoteStatsColorMap,
+} from "../constants";
 import { Note } from "../types";
 
 export function getLocalStorageItem<T>(itemName: string, defaultValue: T): T {
@@ -14,6 +20,13 @@ export function getNote(pitch: number | null): Note | null {
   const octave = Math.floor(semitone / 12);
   const noteName = NoteNames[semitone % 12];
   return { name: noteName, octave: octave };
+}
+
+export function drawEnharmonicNote(key: string): string {
+  // TODO: add sampling of selected enharmonic names given boolean flags from note selector
+  const names = EnharmonicNames[key];
+  const randomIndex = Math.floor(Math.random() * names.length);
+  return names[randomIndex];
 }
 
 export function drawNote(
