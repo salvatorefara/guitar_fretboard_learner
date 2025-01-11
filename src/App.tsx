@@ -126,10 +126,6 @@ const App = () => {
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    cacheImages();
-  }, []);
-
   const imagePath = useMemo(() => {
     if (["Idle", "Countdown"].includes(practiceState)) {
       return (
@@ -287,6 +283,10 @@ const App = () => {
 
     return noteIndexBuffer.slice(-currentBufferSize);
   };
+
+  useEffect(() => {
+    cacheImages();
+  }, []);
 
   useEffect(() => {
     switch (practiceState) {
