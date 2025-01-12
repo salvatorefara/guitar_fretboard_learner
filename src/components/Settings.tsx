@@ -53,6 +53,11 @@ const style = {
 };
 
 const settingNameWidth = 200;
+const toggleButtonStyle = {
+  height: 30,
+  width: 30,
+  justifyContent: "center",
+};
 
 const IOSSlider = styled(Slider)(({ theme }) => ({
   "& .MuiSlider-valueLabel": {
@@ -104,13 +109,16 @@ export default function Settings({
   setMicSensitivityIndex,
 }: SettingsProps) {
   const [selectedNotes, setSelectedNotes] = useState<string[] | null>([]);
+  const [naturalNotes, setNaturalNotes] = useState<string[] | null>([]);
+  const [sharpNotes, setSharpNotes] = useState<string[] | null>([]);
+  const [flatNotes, setFlatNotes] = useState<string[] | null>([]);
 
   const handleNoteSelection = (
-    event: React.MouseEvent<HTMLElement>,
+    _: React.MouseEvent<HTMLElement>,
     newSelection: string[] | null
   ) => {
     setSelectedNotes(newSelection);
-    console.log(event);
+    console.log(newSelection);
   };
 
   const handleClose = () => setOpen(false);
@@ -289,7 +297,7 @@ export default function Settings({
           </Grid>
           <Grid
             container
-            spacing={3}
+            // spacing={3}
             sx={{ alignItems: "center", top: "20px", position: "relative" }}
           >
             <Grid sx={{ width: settingNameWidth }}>
@@ -298,18 +306,135 @@ export default function Settings({
             <Grid size={10}>
               <ToggleButtonGroup
                 size="small"
-                orientation="vertical"
                 value={selectedNotes}
                 onChange={handleNoteSelection}
+                aria-label="natural-notes"
               >
-                <ToggleButton value="C" aria-label="C">
+                <ToggleButton value="C" aria-label="C" sx={toggleButtonStyle}>
                   <Typography sx={{ color: "black" }}>C</Typography>
                 </ToggleButton>
-                <ToggleButton value="B#" aria-label="B#">
-                  <Typography sx={{ color: "black" }}>B#</Typography>
-                </ToggleButton>
-                <ToggleButton value="-" disabled>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
                   {"-"}
+                </ToggleButton>
+                <ToggleButton value="D" aria-label="D" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>D</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="E" aria-label="E" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>E</Typography>
+                </ToggleButton>
+                <ToggleButton value="F" aria-label="F" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>F</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="G" aria-label="G" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>G</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="A" aria-label="A" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>A</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="B" aria-label="B" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>B</Typography>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
+            <Grid size={10}>
+              <ToggleButtonGroup
+                size="small"
+                value={selectedNotes}
+                onChange={handleNoteSelection}
+                aria-label="natural-notes"
+              >
+                <ToggleButton value="C" aria-label="C" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>C</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="D" aria-label="D" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>D</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="E" aria-label="E" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>E</Typography>
+                </ToggleButton>
+                <ToggleButton value="F" aria-label="F" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>F</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="G" aria-label="G" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>G</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="A" aria-label="A" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>A</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="B" aria-label="B" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>B</Typography>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
+            <Grid size={10}>
+              <ToggleButtonGroup
+                size="small"
+                value={selectedNotes}
+                onChange={handleNoteSelection}
+                aria-label="natural-notes"
+              >
+                <ToggleButton value="C" aria-label="C" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>C</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="D" aria-label="D" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>D</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="E" aria-label="E" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>E</Typography>
+                </ToggleButton>
+                <ToggleButton value="F" aria-label="F" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>F</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="G" aria-label="G" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>G</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="A" aria-label="A" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>A</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="B" aria-label="B" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>B</Typography>
                 </ToggleButton>
               </ToggleButtonGroup>
             </Grid>
