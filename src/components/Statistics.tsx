@@ -72,7 +72,6 @@ export default function Statistics({
     );
     colorLabels[0] = `>${MaxTimeToCorrectStats}`;
     colorLabels[colorLabels.length - 1] = "0";
-    console.log(colorLabels);
     label = "Time to correct note (sec)";
     noteStats = Object.fromEntries(
       Object.entries(noteTimeToCorrect).map(([key, value]) => [

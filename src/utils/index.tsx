@@ -7,6 +7,15 @@ import {
 } from "../constants";
 import { Note } from "../types";
 
+export function getNoteImageFileNames(): string[] {
+  const folderContent = import.meta.glob("/public/notes/*.svg");
+  const fileNames = Object.keys(folderContent).map((filePath) =>
+    filePath.replace("/public/", "")
+  );
+  console.log("Note image file names:", fileNames);
+  return fileNames;
+}
+
 export function getLocalStorageItem<T>(itemName: string, defaultValue: T): T {
   const itemValue = localStorage.getItem(itemName);
   return itemValue ? JSON.parse(itemValue) : defaultValue;

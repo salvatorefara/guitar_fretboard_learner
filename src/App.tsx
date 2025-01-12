@@ -12,6 +12,7 @@ import {
   calculateRMS,
   drawEnharmonicNote,
   drawNote,
+  getNoteImageFileNames,
   getLocalStorageItem,
   getNote,
   initializeNoteStats,
@@ -111,7 +112,7 @@ const App = () => {
     const src = noteToImage(null);
     idleImage.src = src;
     imageCache.current[src] = idleImage;
-
+    getNoteImageFileNames();
     const promises = Notes.slice(MinNoteImageIndex, MaxNoteImageIndex + 1).map(
       (note) => {
         return new Promise<void>((resolve, reject) => {
