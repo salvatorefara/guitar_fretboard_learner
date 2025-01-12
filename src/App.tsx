@@ -31,10 +31,7 @@ import {
   MaxIndexBufferSize,
   MaxTimeToCorrect,
   MicSensitivityIndex,
-  MaxNoteImageIndex,
-  MinNoteImageIndex,
   MinPitchRMS,
-  Notes,
   SampleRate,
   TimerTime,
 } from "./constants";
@@ -108,23 +105,15 @@ const App = () => {
   });
 
   const cacheImages = async (): Promise<void> => {
-    const idleImage = new Image();
-    const src = noteToImage(null);
-    idleImage.src = src;
-    imageCache.current[src] = idleImage;
-    getNoteImageFileNames();
-    const promises = Notes.slice(MinNoteImageIndex, MaxNoteImageIndex + 1).map(
-      (note) => {
-        return new Promise<void>((resolve, reject) => {
-          const img = new Image();
-          const src = noteToImage(note);
-          img.src = src;
-          img.onload = () => resolve();
-          img.onerror = () => reject();
-          imageCache.current[src] = img;
-        });
-      }
-    );
+    const promises = getNoteImageFileNames().map((src) => {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+        imageCache.current[src] = img;
+      });
+    });
     await Promise.all(promises);
     setIsLoading(false);
   };
@@ -135,15 +124,15 @@ const App = () => {
         imageCache.current[noteToImage(null, InstrumentOctaveShift[instrument])]
           ?.src || "notes/the_lick.svg"
       );
-    } else if (currentNote) {
+    } else if (enharmonicNote) {
       return (
         imageCache.current[
-          noteToImage(currentNote, InstrumentOctaveShift[instrument])
+          noteToImage(enharmonicNote, InstrumentOctaveShift[instrument])
         ]?.src || ""
       );
     }
     return "";
-  }, [practiceState, currentNote]);
+  }, [practiceState, enharmonicNote]);
 
   const handlePractice = () => {
     if (practiceState == "Idle") {
@@ -466,7 +455,7 @@ const App = () => {
         />
         <Note
           imagePath={imagePath}
-          currentNote={currentNote}
+          currentNote={enharmonicNote}
           practiceState={practiceState}
           showNoteName={showNoteName}
           isAnswerCorrect={isAnswerCorrect}
