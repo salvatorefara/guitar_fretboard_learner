@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
 import Slider from "@mui/material/Slider";
@@ -50,10 +49,12 @@ const style = {
   p: 4,
 };
 
+const settingNameWidth = 200;
+
 const IOSSlider = styled(Slider)(({ theme }) => ({
   "& .MuiSlider-valueLabel": {
     fontWeight: "normal",
-    top: -6,
+    top: 3,
     backgroundColor: "unset",
     color: theme.palette.text.primary,
     "&::before": {
@@ -132,6 +133,9 @@ export default function Settings({
             Settings
           </Typography>
           <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Instrument</Typography>
+            </Grid>
             <Grid>
               <TextField
                 id="standard-select-currency-native"
@@ -154,15 +158,12 @@ export default function Settings({
                 ))}
               </TextField>
             </Grid>
-            <Grid>
-              <Typography sx={{ color: "black" }}>Instrument</Typography>
-            </Grid>
           </Grid>
-
-          <FormControlLabel
-            label="Show note name"
-            sx={{ color: "black" }}
-            control={
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Show note name</Typography>
+            </Grid>
+            <Grid>
               <Switch
                 checked={showNoteName}
                 onChange={() => {
@@ -170,12 +171,15 @@ export default function Settings({
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
-            }
-          />
-          <FormControlLabel
-            label="Change note on mistake"
-            sx={{ color: "black" }}
-            control={
+            </Grid>
+          </Grid>
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>
+                Change note on mistake
+              </Typography>
+            </Grid>
+            <Grid>
               <Switch
                 checked={changeNoteOnMistake}
                 onChange={() => {
@@ -183,23 +187,25 @@ export default function Settings({
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
-            }
-          />
+            </Grid>
+          </Grid>
           <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Use timer</Typography>
+            </Grid>
             <Grid>
-              <FormControlLabel
-                label="Use timer"
-                sx={{ color: "black" }}
-                control={
-                  <Switch
-                    checked={useClock}
-                    onChange={() => {
-                      setUseClock(!useClock);
-                    }}
-                    inputProps={{ "aria-label": "controlled" }}
-                  />
-                }
+              <Switch
+                checked={useClock}
+                onChange={() => {
+                  setUseClock(!useClock);
+                }}
+                inputProps={{ "aria-label": "controlled" }}
               />
+            </Grid>
+          </Grid>
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Timer</Typography>
             </Grid>
             <Grid>
               <TextField
@@ -229,7 +235,10 @@ export default function Settings({
             spacing={3}
             sx={{ alignItems: "center", top: "20px", position: "relative" }}
           >
-            <Grid size={6}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Note range</Typography>
+            </Grid>
+            <Grid size={5}>
               <IOSSlider
                 getAriaLabel={getNoteName}
                 min={InstrumentNoteRangeIndex[instrument][0]}
@@ -242,16 +251,18 @@ export default function Settings({
                 valueLabelFormat={getNoteName}
               />
             </Grid>
-            <Grid>
-              <Typography sx={{ color: "black" }}>Note range</Typography>
-            </Grid>
           </Grid>
           <Grid
             container
             spacing={3}
             sx={{ alignItems: "center", top: "20px", position: "relative" }}
           >
-            <Grid size={6}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>
+                Microphone sensitivity
+              </Typography>
+            </Grid>
+            <Grid size={5}>
               <IOSSlider
                 getAriaLabel={getNoteName}
                 min={0}
@@ -261,11 +272,6 @@ export default function Settings({
                 value={micSensitivityIndex}
                 onChange={handleMicSensitivityChange}
               />
-            </Grid>
-            <Grid>
-              <Typography sx={{ color: "black" }}>
-                Microphone sensitivity
-              </Typography>
             </Grid>
           </Grid>
         </Box>
