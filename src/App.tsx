@@ -286,10 +286,14 @@ const App = () => {
       );
 
       // Exclude indexes that have been shown recently
-      const currentBufferSize = Math.min(
-        MaxIndexBufferSize,
-        Math.round(IndexBufferSizeFraction * includeIndexes.length)
+      let currentBufferSize = Math.round(
+        IndexBufferSizeFraction * includeIndexes.length
       );
+      if (currentBufferSize > MaxIndexBufferSize) {
+        currentBufferSize = MaxIndexBufferSize;
+      } else if (currentBufferSize === 0 && includeIndexes.length > 1) {
+        currentBufferSize = 1;
+      }
       if (currentBufferSize) {
         includeIndexes = includeIndexes.filter(
           (index) => !noteIndexBuffer.slice(-currentBufferSize).includes(index)
