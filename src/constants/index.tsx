@@ -32,6 +32,8 @@ export const EnharmonicNames: { [key: string]: string[] } = {
   B: ["B", "Cb"],
 };
 
+export const AllEnharmonicNames = Object.values(EnharmonicNames).flat();
+
 const Octaves = Array.from({ length: 9 }, (_, i) => i);
 
 export const Notes: Note[] = Octaves.flatMap((octave) =>

@@ -21,6 +21,7 @@ import {
 } from "./utils";
 import {
   AlphaEMA,
+  AllEnharmonicNames,
   CountdownTime,
   DrawNoteMinAccuracy,
   DrawNoteMethod,
@@ -82,6 +83,9 @@ const App = () => {
   const [detectedNote, setDetectedNote] = useState<NoteType | null>(null);
   const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>(
     getLocalStorageItem("noteIndexBuffer", [])
+  );
+  const [selectedNotes, setSelectedNotes] = useState<string[] | null>(
+    getLocalStorageItem("selectedNotes", AllEnharmonicNames)
   );
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
@@ -409,6 +413,10 @@ const App = () => {
   }, [enharmonicNote]);
 
   useEffect(() => {
+    localStorage.setItem("selectedNotes", JSON.stringify(selectedNotes));
+  }, [selectedNotes]);
+
+  useEffect(() => {
     localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
   }, [noteAccuracy]);
 
@@ -494,6 +502,8 @@ const App = () => {
           setTimerTime={setTimerTime}
           micSensitivityIndex={micSensitivityIndex}
           setMicSensitivityIndex={setMicSensitivityIndex}
+          selectedNotes={selectedNotes}
+          setSelectedNotes={setSelectedNotes}
         />
         <Statistics
           open={statisticsOpen}
