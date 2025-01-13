@@ -168,3 +168,5 @@ export const IndexBufferSizeFraction = 0.2;
 export const MinNoteRange = 12;
 
 export const FeedbackDuration = 600;
+
+export const MinSelectedNotes = 1;

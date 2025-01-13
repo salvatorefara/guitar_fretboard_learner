@@ -14,6 +14,7 @@ import {
   InstrumentNoteRangeIndex,
   MinNoteRange,
   MinPitchRMS,
+  MinSelectedNotes,
   Notes,
   TimerTimes,
 } from "../constants";
@@ -115,7 +116,9 @@ export default function Settings({
     _: React.MouseEvent<HTMLElement>,
     newSelection: string[]
   ) => {
-    setSelectedNotes(newSelection);
+    if (newSelection.length >= MinSelectedNotes) {
+      setSelectedNotes(newSelection);
+    }
   };
 
   const handleClose = () => setOpen(false);

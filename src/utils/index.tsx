@@ -1,8 +1,6 @@
 import {
   C0,
   EnharmonicNames,
-  EnharmonicNamesToNote,
-  NoteIndexes,
   NoteNames,
   Notes,
   NoteStatsColorMap,
@@ -31,21 +29,6 @@ export function getNote(pitch: number | null): Note | null {
   const octave = Math.floor(semitone / 12);
   const noteName = NoteNames[semitone % 12];
   return { name: noteName, octave: octave };
-}
-
-export function getIncludeIndexes(selectedNotes: string[] | null): number[] {
-  if (selectedNotes) {
-    const availableNoteNames = selectedNotes.map(
-      (note) => EnharmonicNamesToNote[note]
-    );
-    const availableNoteNamesUnique = Array.from(new Set(availableNoteNames));
-    const includeIndexes = availableNoteNamesUnique
-      .map((note) => NoteIndexes[note])
-      .flat();
-    return includeIndexes;
-  } else {
-    return [];
-  }
 }
 
 export function drawEnharmonicNote(

@@ -190,7 +190,7 @@ const App = () => {
           inputRMS >
           MinPitchRMS[micSensitivityIndex] + previousPitchRMSRef.current
         ) {
-          console.log("New note!");
+          console.log("New note played");
           setNewNoteTimestamp(Date.now());
           previousPitchRMSRef.current = inputRMS;
         } else {
@@ -341,7 +341,7 @@ const App = () => {
         break;
       case "Listening":
         if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
-          console.log(detectedNote);
+          console.log("Detected note:", noteToName(detectedNote));
           setOldNoteTimestamp(newNoteTimestamp);
           if (
             currentNote?.name == detectedNote?.name &&
