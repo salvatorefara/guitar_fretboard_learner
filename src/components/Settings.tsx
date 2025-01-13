@@ -35,8 +35,8 @@ interface SettingsProps {
   setTimerTime: Dispatch<SetStateAction<number>>;
   micSensitivityIndex: number;
   setMicSensitivityIndex: Dispatch<SetStateAction<number>>;
-  selectedNotes: string[] | null;
-  setSelectedNotes: Dispatch<SetStateAction<string[] | null>>;
+  selectedNotes: string[];
+  setSelectedNotes: Dispatch<SetStateAction<string[]>>;
 }
 
 const style = {
@@ -113,10 +113,9 @@ export default function Settings({
 }: SettingsProps) {
   const handleNoteSelection = (
     _: React.MouseEvent<HTMLElement>,
-    newSelection: string[] | null
+    newSelection: string[]
   ) => {
     setSelectedNotes(newSelection);
-    console.log(newSelection);
   };
 
   const handleClose = () => setOpen(false);

@@ -25,6 +25,7 @@ import {
   CountdownTime,
   DrawNoteMinAccuracy,
   DrawNoteMethod,
+  EnharmonicNamesToNote,
   FeedbackDuration,
   IndexBufferSizeFraction,
   InstrumentNoteRangeIndex,
@@ -33,6 +34,7 @@ import {
   MaxTimeToCorrect,
   MicSensitivityIndex,
   MinPitchRMS,
+  NoteIndexes,
   SampleRate,
   TimerTime,
 } from "./constants";
@@ -84,7 +86,7 @@ const App = () => {
   const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>(
     getLocalStorageItem("noteIndexBuffer", [])
   );
-  const [selectedNotes, setSelectedNotes] = useState<string[] | null>(
+  const [selectedNotes, setSelectedNotes] = useState<string[]>(
     getLocalStorageItem("selectedNotes", AllEnharmonicNames)
   );
   const [correct, setCorrect] = useState(0);
@@ -267,17 +269,38 @@ const App = () => {
     console.log("newNoteIndexBuffer:", newNoteIndexBuffer);
   };
 
-  const getResisedNoteindexBuffer = () => {
-    const notesRangeCount = noteIndexRange[1] - noteIndexRange[0] + 1;
-    const currentBufferSize = Math.min(
-      MaxIndexBufferSize,
-      Math.round(IndexBufferSizeFraction * notesRangeCount)
-    );
+  const getIncludeIndexes = () => {
+    if (selectedNotes) {
+      // Get available note indexes
+      const availableNoteNames = selectedNotes.map(
+        (note) => EnharmonicNamesToNote[note]
+      );
+      const availableNoteNamesUnique = Array.from(new Set(availableNoteNames));
+      let includeIndexes = availableNoteNamesUnique
+        .map((note) => NoteIndexes[note])
+        .flat();
 
-    console.log("notesRangeCount:", notesRangeCount);
-    console.log("currentBufferSize:", currentBufferSize);
+      // Select indexes within current range
+      includeIndexes = includeIndexes.filter(
+        (index) => noteIndexRange[0] <= index && index <= noteIndexRange[1]
+      );
 
-    return noteIndexBuffer.slice(-currentBufferSize);
+      // Exclude indexes that have been shown recently
+      const currentBufferSize = Math.min(
+        MaxIndexBufferSize,
+        Math.round(IndexBufferSizeFraction * includeIndexes.length)
+      );
+      includeIndexes = includeIndexes.filter(
+        (index) => !noteIndexBuffer.slice(-currentBufferSize).includes(index)
+      );
+
+      console.log("includeIndexes:", includeIndexes);
+      console.log("currentBufferSize:", currentBufferSize);
+
+      return includeIndexes;
+    } else {
+      return [];
+    }
   };
 
   useEffect(() => {
@@ -290,15 +313,17 @@ const App = () => {
         break;
       case "New Note":
         const [randomNote, noteIndex] = drawNote(
-          noteIndexRange,
-          getResisedNoteindexBuffer(),
+          getIncludeIndexes(),
           noteAccuracy,
           noteTimeToCorrect,
           DrawNoteMinAccuracy,
           MaxTimeToCorrect,
           DrawNoteMethod
         );
-        const enharmonicNoteName = drawEnharmonicNote(randomNote.name);
+        const enharmonicNoteName = drawEnharmonicNote(
+          randomNote.name,
+          selectedNotes
+        );
         setEnharmonicNote({
           name: enharmonicNoteName,
           octave: randomNote.octave,
@@ -413,6 +438,8 @@ const App = () => {
   }, [enharmonicNote]);
 
   useEffect(() => {
+    getIncludeIndexes();
+    console.log("Selected notes", selectedNotes);
     localStorage.setItem("selectedNotes", JSON.stringify(selectedNotes));
   }, [selectedNotes]);
 

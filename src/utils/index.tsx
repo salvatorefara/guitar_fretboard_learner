@@ -1,6 +1,8 @@
 import {
   C0,
   EnharmonicNames,
+  EnharmonicNamesToNote,
+  NoteIndexes,
   NoteNames,
   Notes,
   NoteStatsColorMap,
@@ -31,71 +33,71 @@ export function getNote(pitch: number | null): Note | null {
   return { name: noteName, octave: octave };
 }
 
-export function drawEnharmonicNote(key: string): string {
-  // TODO: add sampling of selected enharmonic names given boolean flags from note selector
-  const names = EnharmonicNames[key];
+export function getIncludeIndexes(selectedNotes: string[] | null): number[] {
+  if (selectedNotes) {
+    const availableNoteNames = selectedNotes.map(
+      (note) => EnharmonicNamesToNote[note]
+    );
+    const availableNoteNamesUnique = Array.from(new Set(availableNoteNames));
+    const includeIndexes = availableNoteNamesUnique
+      .map((note) => NoteIndexes[note])
+      .flat();
+    return includeIndexes;
+  } else {
+    return [];
+  }
+}
+
+export function drawEnharmonicNote(
+  key: string,
+  selectedNotes: string[]
+): string {
+  const names = EnharmonicNames[key].filter((note) =>
+    selectedNotes.includes(note)
+  );
   const randomIndex = Math.floor(Math.random() * names.length);
   return names[randomIndex];
 }
 
 export function drawNote(
-  noteIndexRange: number[],
-  excludeIndexes: number[] = [],
+  includeIndexes: number[] = [],
   accuracies: Record<string, number> = {},
   times: Record<string, number> = {},
   minAccuracy: number = 0.1,
   maxTime: number = 10,
-  method: "random" | "accuracy-based" | "time-based" = "random"
+  method: "accuracy-based" | "time-based"
 ): [Note, number] {
-  if (method === "random") {
-    const noteIndex = Math.round(
-      noteIndexRange[0] +
-        Math.random() * (noteIndexRange[1] - noteIndexRange[0])
-    );
-    return [Notes[noteIndex], noteIndex];
-  } else {
-    const isIndexValid = (index: number): boolean => {
-      return (
-        noteIndexRange[0] <= index &&
-        index <= noteIndexRange[1] &&
-        !excludeIndexes.includes(index)
-      );
-    };
-    const indexes = Notes.map((_, index) => {
-      return index;
-    });
-    const indexesSelected = indexes.filter((index) => isIndexValid(index));
-    const notesSelected = Notes.filter((_, index) => isIndexValid(index));
+  const notesSelected = Notes.filter((_, index) =>
+    includeIndexes.includes(index)
+  );
+  const weights =
+    method === "accuracy-based"
+      ? notesSelected.map((note, _) => {
+          const noteName = noteToName(note);
+          let accuracy = accuracies[noteName];
+          accuracy = accuracy ? Math.max(accuracy, minAccuracy) : minAccuracy;
+          return 1 / accuracy;
+        })
+      : notesSelected.map((note, _) => {
+          const noteName = noteToName(note);
+          const timeToCorrect = times[noteName];
+          return timeToCorrect ? Math.min(timeToCorrect, maxTime) : maxTime;
+        });
 
-    const weights =
-      method === "accuracy-based"
-        ? notesSelected.map((note, _) => {
-            const noteName = noteToName(note);
-            let accuracy = accuracies[noteName];
-            accuracy = accuracy ? Math.max(accuracy, minAccuracy) : minAccuracy;
-            return 1 / accuracy;
-          })
-        : notesSelected.map((note, _) => {
-            const noteName = noteToName(note);
-            const timeToCorrect = times[noteName];
-            return timeToCorrect ? Math.min(timeToCorrect, maxTime) : maxTime;
-          });
+  const weightsSum = weights.reduce((sum, w) => sum + w, 0);
+  const probabilities = weights.map((w) => w / weightsSum);
+  const cumulativeDistribution: number[] = [];
+  probabilities.reduce((sum, p, index) => {
+    cumulativeDistribution[index] = sum + p;
+    return sum + p;
+  }, 0);
 
-    const weightsSum = weights.reduce((sum, w) => sum + w, 0);
-    const probabilities = weights.map((w) => w / weightsSum);
-    const cumulativeDistribution: number[] = [];
-    probabilities.reduce((sum, p, index) => {
-      cumulativeDistribution[index] = sum + p;
-      return sum + p;
-    }, 0);
+  const randomValue = Math.random();
+  const selectIndex = cumulativeDistribution.findIndex(
+    (cumulativeProb) => randomValue < cumulativeProb
+  );
 
-    const randomValue = Math.random();
-    const selectIndex = cumulativeDistribution.findIndex(
-      (cumulativeProb) => randomValue < cumulativeProb
-    );
-
-    return [Notes[indexesSelected[selectIndex]], indexesSelected[selectIndex]];
-  }
+  return [Notes[includeIndexes[selectIndex]], includeIndexes[selectIndex]];
 }
 
 export function noteToName(note: Note): string {

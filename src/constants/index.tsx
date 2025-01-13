@@ -34,11 +34,51 @@ export const EnharmonicNames: { [key: string]: string[] } = {
 
 export const AllEnharmonicNames = Object.values(EnharmonicNames).flat();
 
-const Octaves = Array.from({ length: 9 }, (_, i) => i);
+export const EnharmonicNamesToNote: { [key: string]: string } = {
+  C: "C",
+  "B#": "C",
+  "C#": "C#",
+  Db: "C#",
+  D: "D",
+  "D#": "D#",
+  Eb: "D#",
+  E: "E",
+  Fb: "E",
+  F: "F",
+  "E#": "F",
+  "F#": "F#",
+  Gb: "F#",
+  G: "G",
+  "G#": "G#",
+  Ab: "G#",
+  A: "A",
+  "A#": "A#",
+  Bb: "A#",
+  B: "B",
+  Cb: "B",
+};
+
+const NumOctaves = 9;
+const Octaves = Array.from({ length: NumOctaves }, (_, i) => i);
 
 export const Notes: Note[] = Octaves.flatMap((octave) =>
   NoteNames.map((name) => ({ name, octave }))
 ).slice(0, -11); // Range from C0 to C8
+
+export const NoteIndexes: { [key: string]: number[] } = {
+  C: Array.from({ length: NumOctaves }, (_, index) => index * 12),
+  "C#": Array.from({ length: NumOctaves }, (_, index) => index * 12 + 1),
+  D: Array.from({ length: NumOctaves }, (_, index) => index * 12 + 2),
+  "D#": Array.from({ length: NumOctaves }, (_, index) => index * 12 + 3),
+  E: Array.from({ length: NumOctaves }, (_, index) => index * 12 + 4),
+  F: Array.from({ length: NumOctaves }, (_, index) => index * 12 + 5),
+  "F#": Array.from({ length: NumOctaves }, (_, index) => index * 12 + 6),
+  G: Array.from({ length: NumOctaves }, (_, index) => index * 12 + 7),
+  "G#": Array.from({ length: NumOctaves }, (_, index) => index * 12 + 8),
+  A: Array.from({ length: NumOctaves }, (_, index) => index * 12 + 9),
+  "A#": Array.from({ length: NumOctaves }, (_, index) => index * 12 + 10),
+  B: Array.from({ length: NumOctaves }, (_, index) => index * 12 + 11),
+};
 
 export const MinNoteImageIndex = 40; // E3
 export const MaxNoteImageIndex = 84; // C7
