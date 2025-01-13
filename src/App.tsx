@@ -290,9 +290,11 @@ const App = () => {
         MaxIndexBufferSize,
         Math.round(IndexBufferSizeFraction * includeIndexes.length)
       );
-      includeIndexes = includeIndexes.filter(
-        (index) => !noteIndexBuffer.slice(-currentBufferSize).includes(index)
-      );
+      if (currentBufferSize) {
+        includeIndexes = includeIndexes.filter(
+          (index) => !noteIndexBuffer.slice(-currentBufferSize).includes(index)
+        );
+      }
 
       console.log("includeIndexes:", includeIndexes);
       console.log("currentBufferSize:", currentBufferSize);
