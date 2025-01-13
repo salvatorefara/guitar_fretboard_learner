@@ -1,18 +1,20 @@
 import { Dispatch, SetStateAction } from "react";
 import Box from "@mui/material/Box";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Grid from "@mui/material/Grid2";
-import TextField from "@mui/material/TextField";
+import Modal from "@mui/material/Modal";
 import Slider from "@mui/material/Slider";
 import { styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import {
   Instruments,
   InstrumentNoteRangeIndex,
   MinNoteRange,
   MinPitchRMS,
+  MinSelectedNotes,
   Notes,
   TimerTimes,
 } from "../constants";
@@ -34,6 +36,8 @@ interface SettingsProps {
   setTimerTime: Dispatch<SetStateAction<number>>;
   micSensitivityIndex: number;
   setMicSensitivityIndex: Dispatch<SetStateAction<number>>;
+  selectedNotes: string[];
+  setSelectedNotes: Dispatch<SetStateAction<string[]>>;
 }
 
 const style = {
@@ -50,10 +54,17 @@ const style = {
   p: 4,
 };
 
+const settingNameWidth = 170;
+const toggleButtonStyle = {
+  height: 29,
+  width: 29,
+  justifyContent: "center",
+};
+
 const IOSSlider = styled(Slider)(({ theme }) => ({
   "& .MuiSlider-valueLabel": {
     fontWeight: "normal",
-    top: -6,
+    top: 3,
     backgroundColor: "unset",
     color: theme.palette.text.primary,
     "&::before": {
@@ -98,7 +109,18 @@ export default function Settings({
   setTimerTime,
   micSensitivityIndex,
   setMicSensitivityIndex,
+  selectedNotes,
+  setSelectedNotes,
 }: SettingsProps) {
+  const handleNoteSelection = (
+    _: React.MouseEvent<HTMLElement>,
+    newSelection: string[]
+  ) => {
+    if (newSelection.length >= MinSelectedNotes) {
+      setSelectedNotes(newSelection);
+    }
+  };
+
   const handleClose = () => setOpen(false);
 
   const getNoteName = (index: number) => {
@@ -132,6 +154,9 @@ export default function Settings({
             Settings
           </Typography>
           <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Instrument</Typography>
+            </Grid>
             <Grid>
               <TextField
                 id="standard-select-currency-native"
@@ -154,15 +179,12 @@ export default function Settings({
                 ))}
               </TextField>
             </Grid>
-            <Grid>
-              <Typography sx={{ color: "black" }}>Instrument</Typography>
-            </Grid>
           </Grid>
-
-          <FormControlLabel
-            label="Show note name"
-            sx={{ color: "black" }}
-            control={
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Show note name</Typography>
+            </Grid>
+            <Grid>
               <Switch
                 checked={showNoteName}
                 onChange={() => {
@@ -170,12 +192,15 @@ export default function Settings({
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
-            }
-          />
-          <FormControlLabel
-            label="Change note on mistake"
-            sx={{ color: "black" }}
-            control={
+            </Grid>
+          </Grid>
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>
+                Change note on mistake
+              </Typography>
+            </Grid>
+            <Grid>
               <Switch
                 checked={changeNoteOnMistake}
                 onChange={() => {
@@ -183,23 +208,25 @@ export default function Settings({
                 }}
                 inputProps={{ "aria-label": "controlled" }}
               />
-            }
-          />
+            </Grid>
+          </Grid>
           <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Use timer</Typography>
+            </Grid>
             <Grid>
-              <FormControlLabel
-                label="Use timer"
-                sx={{ color: "black" }}
-                control={
-                  <Switch
-                    checked={useClock}
-                    onChange={() => {
-                      setUseClock(!useClock);
-                    }}
-                    inputProps={{ "aria-label": "controlled" }}
-                  />
-                }
+              <Switch
+                checked={useClock}
+                onChange={() => {
+                  setUseClock(!useClock);
+                }}
+                inputProps={{ "aria-label": "controlled" }}
               />
+            </Grid>
+          </Grid>
+          <Grid container spacing={2} sx={{ alignItems: "center" }}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Timer</Typography>
             </Grid>
             <Grid>
               <TextField
@@ -229,7 +256,10 @@ export default function Settings({
             spacing={3}
             sx={{ alignItems: "center", top: "20px", position: "relative" }}
           >
-            <Grid size={6}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Note range</Typography>
+            </Grid>
+            <Grid size={5}>
               <IOSSlider
                 getAriaLabel={getNoteName}
                 min={InstrumentNoteRangeIndex[instrument][0]}
@@ -242,16 +272,18 @@ export default function Settings({
                 valueLabelFormat={getNoteName}
               />
             </Grid>
-            <Grid>
-              <Typography sx={{ color: "black" }}>Note range</Typography>
-            </Grid>
           </Grid>
           <Grid
             container
             spacing={3}
             sx={{ alignItems: "center", top: "20px", position: "relative" }}
           >
-            <Grid size={6}>
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>
+                Microphone sensitivity
+              </Typography>
+            </Grid>
+            <Grid size={5}>
               <IOSSlider
                 getAriaLabel={getNoteName}
                 min={0}
@@ -262,10 +294,148 @@ export default function Settings({
                 onChange={handleMicSensitivityChange}
               />
             </Grid>
-            <Grid>
-              <Typography sx={{ color: "black" }}>
-                Microphone sensitivity
-              </Typography>
+          </Grid>
+          <Grid
+            container
+            sx={{ alignItems: "center", top: "20px", position: "relative" }}
+          >
+            <Grid sx={{ width: settingNameWidth }}>
+              <Typography sx={{ color: "black" }}>Note Selector</Typography>
+            </Grid>
+            <Grid size={10}>
+              <ToggleButtonGroup
+                size="small"
+                value={selectedNotes}
+                onChange={handleNoteSelection}
+                aria-label="natural-notes"
+              >
+                <ToggleButton value="C" aria-label="C" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>C</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="D" aria-label="D" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>D</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="E" aria-label="E" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>E</Typography>
+                </ToggleButton>
+                <ToggleButton value="F" aria-label="F" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>F</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="G" aria-label="G" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>G</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="A" aria-label="A" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>A</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="B" aria-label="B" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>B</Typography>
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
+            <Grid size={10}>
+              <ToggleButtonGroup
+                size="small"
+                value={selectedNotes}
+                onChange={handleNoteSelection}
+                aria-label="sharp-notes"
+              >
+                <ToggleButton value="B#" aria-label="B#" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>B♯</Typography>
+                </ToggleButton>
+                <ToggleButton value="C#" aria-label="C#" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>C♯</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="D#" aria-label="D#" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>D♯</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="E#" aria-label="E#" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>E♯</Typography>
+                </ToggleButton>
+                <ToggleButton value="F#" aria-label="F#" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>F♯</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="G#" aria-label="G#" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>G♯</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="A#" aria-label="A#" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>A♯</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Grid>
+            <Grid size={10}>
+              <ToggleButtonGroup
+                size="small"
+                value={selectedNotes}
+                onChange={handleNoteSelection}
+                aria-label="flat-notes"
+              >
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="Db" aria-label="Db" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>D♭</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="Eb" aria-label="Eb" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>E♭</Typography>
+                </ToggleButton>
+                <ToggleButton value="Fb" aria-label="Fb" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>F♭</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="Gb" aria-label="Gb" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>G♭</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="Ab" aria-label="Ab" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>A♭</Typography>
+                </ToggleButton>
+                <ToggleButton value="-" disabled sx={toggleButtonStyle}>
+                  {"-"}
+                </ToggleButton>
+                <ToggleButton value="Bb" aria-label="Bb" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>B♭</Typography>
+                </ToggleButton>
+                <ToggleButton value="Cb" aria-label="Cb" sx={toggleButtonStyle}>
+                  <Typography sx={{ color: "black" }}>C♭</Typography>
+                </ToggleButton>
+              </ToggleButtonGroup>
             </Grid>
           </Grid>
         </Box>

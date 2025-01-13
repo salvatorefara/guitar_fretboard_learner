@@ -10,7 +10,9 @@ import Settings from "./components/Settings";
 import Statistics from "./components/Statistics";
 import {
   calculateRMS,
+  drawEnharmonicNote,
   drawNote,
+  getNoteImageFileNames,
   getLocalStorageItem,
   getNote,
   initializeNoteStats,
@@ -19,9 +21,11 @@ import {
 } from "./utils";
 import {
   AlphaEMA,
+  AllEnharmonicNames,
   CountdownTime,
   DrawNoteMinAccuracy,
   DrawNoteMethod,
+  EnharmonicNamesToNote,
   FeedbackDuration,
   IndexBufferSizeFraction,
   InstrumentNoteRangeIndex,
@@ -29,10 +33,8 @@ import {
   MaxIndexBufferSize,
   MaxTimeToCorrect,
   MicSensitivityIndex,
-  MaxNoteImageIndex,
-  MinNoteImageIndex,
   MinPitchRMS,
-  Notes,
+  NoteIndexes,
   SampleRate,
   TimerTime,
 } from "./constants";
@@ -79,9 +81,13 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [practiceState, setPracticeState] = useState<PracticeState>("Idle");
   const [currentNote, setCurrentNote] = useState<NoteType | null>(null);
+  const [enharmonicNote, setEnharmonicNote] = useState<NoteType | null>(null);
   const [detectedNote, setDetectedNote] = useState<NoteType | null>(null);
   const [noteIndexBuffer, setNoteIndexBuffer] = useState<number[]>(
     getLocalStorageItem("noteIndexBuffer", [])
+  );
+  const [selectedNotes, setSelectedNotes] = useState<string[]>(
+    getLocalStorageItem("selectedNotes", AllEnharmonicNames)
   );
   const [correct, setCorrect] = useState(0);
   const [incorrect, setIncorrect] = useState(0);
@@ -105,30 +111,18 @@ const App = () => {
   });
 
   const cacheImages = async (): Promise<void> => {
-    const idleImage = new Image();
-    const src = noteToImage(null);
-    idleImage.src = src;
-    imageCache.current[src] = idleImage;
-
-    const promises = Notes.slice(MinNoteImageIndex, MaxNoteImageIndex + 1).map(
-      (note) => {
-        return new Promise<void>((resolve, reject) => {
-          const img = new Image();
-          const src = noteToImage(note);
-          img.src = src;
-          img.onload = () => resolve();
-          img.onerror = () => reject();
-          imageCache.current[src] = img;
-        });
-      }
-    );
+    const promises = getNoteImageFileNames().map((src) => {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve();
+        img.onerror = () => reject();
+        imageCache.current[src] = img;
+      });
+    });
     await Promise.all(promises);
     setIsLoading(false);
   };
-
-  useEffect(() => {
-    cacheImages();
-  }, []);
 
   const imagePath = useMemo(() => {
     if (["Idle", "Countdown"].includes(practiceState)) {
@@ -136,15 +130,15 @@ const App = () => {
         imageCache.current[noteToImage(null, InstrumentOctaveShift[instrument])]
           ?.src || "notes/the_lick.svg"
       );
-    } else if (currentNote) {
+    } else if (enharmonicNote) {
       return (
         imageCache.current[
-          noteToImage(currentNote, InstrumentOctaveShift[instrument])
+          noteToImage(enharmonicNote, InstrumentOctaveShift[instrument])
         ]?.src || ""
       );
     }
     return "";
-  }, [practiceState, currentNote]);
+  }, [practiceState, enharmonicNote]);
 
   const handlePractice = () => {
     if (practiceState == "Idle") {
@@ -196,7 +190,7 @@ const App = () => {
           inputRMS >
           MinPitchRMS[micSensitivityIndex] + previousPitchRMSRef.current
         ) {
-          console.log("New note!");
+          console.log("New note played");
           setNewNoteTimestamp(Date.now());
           previousPitchRMSRef.current = inputRMS;
         } else {
@@ -275,18 +269,49 @@ const App = () => {
     console.log("newNoteIndexBuffer:", newNoteIndexBuffer);
   };
 
-  const getResisedNoteindexBuffer = () => {
-    const notesRangeCount = noteIndexRange[1] - noteIndexRange[0] + 1;
-    const currentBufferSize = Math.min(
-      MaxIndexBufferSize,
-      Math.round(IndexBufferSizeFraction * notesRangeCount)
-    );
+  const getIncludeIndexes = () => {
+    if (selectedNotes) {
+      // Get available note indexes
+      const availableNoteNames = selectedNotes.map(
+        (note) => EnharmonicNamesToNote[note]
+      );
+      const availableNoteNamesUnique = Array.from(new Set(availableNoteNames));
+      let includeIndexes = availableNoteNamesUnique
+        .map((note) => NoteIndexes[note])
+        .flat();
 
-    console.log("notesRangeCount:", notesRangeCount);
-    console.log("currentBufferSize:", currentBufferSize);
+      // Select indexes within current range
+      includeIndexes = includeIndexes.filter(
+        (index) => noteIndexRange[0] <= index && index <= noteIndexRange[1]
+      );
 
-    return noteIndexBuffer.slice(-currentBufferSize);
+      // Exclude indexes that have been shown recently
+      let currentBufferSize = Math.round(
+        IndexBufferSizeFraction * includeIndexes.length
+      );
+      if (currentBufferSize > MaxIndexBufferSize) {
+        currentBufferSize = MaxIndexBufferSize;
+      } else if (currentBufferSize === 0 && includeIndexes.length > 1) {
+        currentBufferSize = 1;
+      }
+      if (currentBufferSize) {
+        includeIndexes = includeIndexes.filter(
+          (index) => !noteIndexBuffer.slice(-currentBufferSize).includes(index)
+        );
+      }
+
+      console.log("includeIndexes:", includeIndexes);
+      console.log("currentBufferSize:", currentBufferSize);
+
+      return includeIndexes;
+    } else {
+      return [];
+    }
   };
+
+  useEffect(() => {
+    cacheImages();
+  }, []);
 
   useEffect(() => {
     switch (practiceState) {
@@ -294,14 +319,21 @@ const App = () => {
         break;
       case "New Note":
         const [randomNote, noteIndex] = drawNote(
-          noteIndexRange,
-          getResisedNoteindexBuffer(),
+          getIncludeIndexes(),
           noteAccuracy,
           noteTimeToCorrect,
           DrawNoteMinAccuracy,
           MaxTimeToCorrect,
           DrawNoteMethod
         );
+        const enharmonicNoteName = drawEnharmonicNote(
+          randomNote.name,
+          selectedNotes
+        );
+        setEnharmonicNote({
+          name: enharmonicNoteName,
+          octave: randomNote.octave,
+        });
         updateNoteIndexBuffer(noteIndex);
         setCurrentNote(randomNote);
         setPracticeState("Listening");
@@ -309,7 +341,7 @@ const App = () => {
         break;
       case "Listening":
         if (detectedNote && oldNoteTimestamp != newNoteTimestamp) {
-          console.log(detectedNote);
+          console.log("Detected note:", noteToName(detectedNote));
           setOldNoteTimestamp(newNoteTimestamp);
           if (
             currentNote?.name == detectedNote?.name &&
@@ -405,6 +437,19 @@ const App = () => {
   }, [currentNote]);
 
   useEffect(() => {
+    console.log(
+      "Enharmonic note:",
+      enharmonicNote ? noteToName(enharmonicNote) : null
+    );
+  }, [enharmonicNote]);
+
+  useEffect(() => {
+    getIncludeIndexes();
+    console.log("Selected notes", selectedNotes);
+    localStorage.setItem("selectedNotes", JSON.stringify(selectedNotes));
+  }, [selectedNotes]);
+
+  useEffect(() => {
     localStorage.setItem("noteAccuracy", JSON.stringify(noteAccuracy));
   }, [noteAccuracy]);
 
@@ -451,7 +496,7 @@ const App = () => {
         />
         <Note
           imagePath={imagePath}
-          currentNote={currentNote}
+          currentNote={enharmonicNote}
           practiceState={practiceState}
           showNoteName={showNoteName}
           isAnswerCorrect={isAnswerCorrect}
@@ -490,6 +535,8 @@ const App = () => {
           setTimerTime={setTimerTime}
           micSensitivityIndex={micSensitivityIndex}
           setMicSensitivityIndex={setMicSensitivityIndex}
+          selectedNotes={selectedNotes}
+          setSelectedNotes={setSelectedNotes}
         />
         <Statistics
           open={statisticsOpen}
