@@ -11,9 +11,8 @@ https://github.com/user-attachments/assets/59909e33-bf26-4594-acee-e54b4fe993fc
 ## Instructions
 
 ### Settings
-
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/ce4a2669-5453-413c-9b05-bc0ae82579c2" alt="settings" height="500">
+  <img src="https://github.com/user-attachments/assets/ce4a2669-5453-413c-9b05-bc0ae82579c2" alt="settings">
 </div>
 
 To open the settings menu click on the gear icon in the header. The settings will allow you to customise your practice. 
@@ -44,7 +43,7 @@ You can click on individual notes to include/exclude them. Only greyed-out notes
 
 ### Practice interface
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/82835780-5e9f-4b07-9ce8-431b630467fc" alt="settings" height="500">
+  <img src="https://github.com/user-attachments/assets/82835780-5e9f-4b07-9ce8-431b630467fc" alt="settings">
 </div>
 
 To start a practice session click the start practice button. Likewise, to end a practice session at any time click the stop practice button. 
@@ -57,12 +56,11 @@ Below the timer, you will see statistics of your current practice session, inclu
 The statistics menu can be opened by clicking the graph icon in the header. This menu will show note-by-note statistics accumulated in all your practice sessions so far. 
 Two statistics are currently available: average accuracy and time to correct answer. 
 Note that this data is stored locally in your browser memory, and therefore will not be available across browsers or across different devices. 
-![stats_accuracy](https://github.com/user-attachments/assets/5a5b5927-dcbd-47ad-885b-256f044604a0)
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/8e25a22a-f776-4fa6-b612-813cea330fff" alt="settings" height="500">
+  <img src="https://github.com/user-attachments/assets/8e25a22a-f776-4fa6-b612-813cea330fff" alt="settings">
 </div>
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/09d5253a-fe2b-440d-b88e-ee95fcc26c76" alt="settings" height="500">
+  <img src="https://github.com/user-attachments/assets/09d5253a-fe2b-440d-b88e-ee95fcc26c76" alt="settings">
 </div>
