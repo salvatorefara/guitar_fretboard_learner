@@ -57,6 +57,7 @@ Below the timer, you will see statistics of your current practice session, inclu
 The statistics menu can be opened by clicking the graph icon in the header. This menu will show note-by-note statistics accumulated in all your practice sessions so far. 
 Two statistics are currently available: average accuracy and time to correct answer. 
 Note that this data is stored locally in your browser memory, and therefore will not be available across browsers or across different devices. 
+![stats_accuracy](https://github.com/user-attachments/assets/5a5b5927-dcbd-47ad-885b-256f044604a0)
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/8e25a22a-f776-4fa6-b612-813cea330fff" alt="settings" height="500">
