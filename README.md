@@ -48,7 +48,7 @@ You can click on individual notes to include/exclude them. Only greyed-out notes
 
 To start a practice session click the start practice button. Likewise, to end a practice session at any time click the stop practice button. 
 During the practice, you will see a note in musical notation on top of the screen. Once you play that note on your instrument, a new note will be shown and so on. 
-If the note you play is correct a +1 will be shown briefly on the right of the note, otherwise a -1 will be shown. In the settings you can choose if you want a note to stay until it is played correctly, or if you want it to change even on mistake. 
+If the note you play is correct a +1 will be shown briefly on the right of the note, otherwise a -1 will be shown. In the settings you can choose if you want a note to stay until it is played correctly, or if you want it to change after a mistake. 
 Right below the musical notation, you will see the note name and the timer. You can remove both note name and/or timer in the settings if you want. 
 Below the timer, you will see statistics of your current practice session, including: number of correct answers, number of incorrect answers, average accuracy and average time to correct answer. 
 
