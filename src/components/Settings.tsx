@@ -300,7 +300,7 @@ export default function Settings({
             sx={{ alignItems: "center", top: "20px", position: "relative" }}
           >
             <Grid sx={{ width: settingNameWidth }}>
-              <Typography sx={{ color: "black" }}>Note Selector</Typography>
+              <Typography sx={{ color: "black" }}>Note selector</Typography>
             </Grid>
             <Grid size={10}>
               <ToggleButtonGroup
