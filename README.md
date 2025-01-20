@@ -1,8 +1,8 @@
 # Guitar Fretboard Learner
 
 Web app to learn the notes on the guitar fretboard. Practice playing the notes on your instrument as they appear on screen. 
-This app will use your device's microphone to pick up each note you play and tell you if it's right or wrong. 
-Needless to say, this app will work best in a quiet environment. 
+This app uses your device's microphone to pick up each note you play and tell you if it's right or wrong. 
+Needless to say, this app works best in a quiet environment. 
 
 Try it [here](https://guitar-fretboard-learner-zeta.vercel.app/). 
     
